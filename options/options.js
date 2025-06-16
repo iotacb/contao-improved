@@ -45,3 +45,9 @@ const restoreOptions = () => {
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
 document.getElementById('save').addEventListener('click', saveOptions);
+
+const version = chrome.runtime.getManifest().version;
+const versionElement = document.getElementById('extension-version');
+if (versionElement) {
+  versionElement.textContent = `v${version}`;
+}

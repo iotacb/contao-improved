@@ -45,6 +45,13 @@ Introduces a search bar on the "edit multiple" screen to help you quickly locate
 
 ---
 
+### Select highlight
+![Highlight selected](./images/features/highlight.gif)
+
+Highlight selected elements when editing multiple elements
+
+---
+
 ### Display IDs
 ![Display Ids](./images/features/display-ids.png)
 
