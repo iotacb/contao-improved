@@ -1,0 +1,262 @@
+body.options {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-width: 300px;
+  min-height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: hidden;
+}
+body.options .options-container {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+body.options .options-container h1 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: #ffffff;
+}
+body.options .options-container h2 {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #a0a0a0;
+}
+body.options .options-section {
+  margin-bottom: 2rem;
+}
+body.options .options-section:last-of-type {
+  margin-bottom: 1.5rem;
+}
+body.options .option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+body.options .toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+body.options .toggle-label:hover {
+  transform: translateX(2px);
+}
+body.options .toggle-label input[type=checkbox] {
+  display: none;
+}
+body.options .toggle-label .toggle-slider {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-right: 0.75rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+body.options .toggle-label .toggle-slider::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+body.options .toggle-label input[type=checkbox]:checked + .toggle-slider {
+  background: linear-gradient(135deg, #eaaf66 0%, #a27b4b 100%);
+  border-color: #eaac66;
+}
+body.options .toggle-label input[type=checkbox]:checked + .toggle-slider::before {
+  transform: translateX(20px);
+}
+body.options .toggle-label .toggle-text {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #e0e0e0;
+}
+body.options .select-wrapper {
+  position: relative;
+}
+body.options .select-wrapper select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+}
+body.options .select-wrapper select:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+body.options .select-wrapper select:focus {
+  outline: none;
+  border-color: #eaaf66;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+body.options .select-wrapper select option {
+  background: #2d2d2d;
+  color: #ffffff;
+}
+body.options .save-button {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: linear-gradient(135deg, #eaaf66 0%, #a27b4b 100%);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(234, 172, 102, 0.3);
+}
+body.options .save-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(234, 192, 102, 0.4);
+}
+body.options .save-button:active {
+  transform: translateY(0);
+}
+body.options .save-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(234, 201, 102, 0.3);
+}
+body.options .status-message {
+  min-height: 1.2rem;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+body.options .status-message.show {
+  opacity: 1;
+}
+body.options .status-message.success {
+  color: #4ade80;
+}
+body.options .status-message.error {
+  color: #f87171;
+}
+body.options .info p, body.options .info a {
+  color: gray;
+  text-align: center;
+}
+body.options .info a {
+  text-decoration: underline;
+}
+body.options .info a:hover, body.options .info a:focus {
+  color: white;
+}
+body.be_main .tl_file:has(input[type=checkbox]:checked) {
+  background-color: var(--hover-row, #fffce1);
+}
+body.be_main .context-menu {
+  position: absolute;
+  z-index: 1000;
+  background-color: var(--form-bg, #fff);
+  border: 1px solid var(--form-border, #aaa);
+  visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  min-width: fit-content;
+  border-radius: 0.5rem;
+  overflow: clip;
+}
+body.be_main .context-menu.open {
+  visibility: visible;
+}
+body.be_main .context-menu a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.75rem;
+  padding-inline: 0.5rem;
+  text-wrap: nowrap;
+}
+body.be_main .context-menu a:not(:last-child) {
+  border-bottom: 1px solid var(--form-border, #aaa);
+}
+body.be_main .context-menu a:hover {
+  background-color: var(--hover-row, #fffce1);
+}
+body.be_main .tl_right,
+body.be_main .tl_content_right {
+  padding-right: 9px;
+}
+body.be_main .tl_id {
+  min-width: 6ch;
+  opacity: 0.5;
+}
+body.be_main .tl_checkbox_container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: start;
+  justify-content: start;
+  margin-bottom: 0.25rem;
+}
+body.be_main .tl_checkbox_container legend {
+  display: inline-block;
+  flex-basis: 100%;
+  margin-bottom: 0.25rem;
+}
+body.be_main .tl_checkbox_container br {
+  display: none;
+}
+body.be_main .tl_checkbox_container input {
+  flex-basis: 13px;
+}
+body.be_main .tl_checkbox_container label {
+  flex-basis: calc(100% - 20px);
+}
+body.be_main .search-bar {
+  margin-bottom: 0.5rem;
+}
+body.be_main .search-bar p {
+  margin-bottom: unset;
+}
+body.be_main .search-highlight {
+  display: inline-block;
+  background-color: var(--hover-row, rgba(255, 172, 94, 0.5));
+}
+body.be_main .search-highlight:is(label) {
+  width: calc(100% - 18px);
+}
+body.be_main .search-fade {
+  opacity: 0.5;
+}
+body.be_main .search-hidden {
+  display: none;
+}

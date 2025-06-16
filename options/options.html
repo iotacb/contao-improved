@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Contao Improved - Options</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body class="options">
+    <div class="options-container">
+      <h1>Settings</h1>
+      
+      <div class="options-section">
+        <h2>Display Options</h2>
+        <div class="option-group">
+          <label class="toggle-label">
+            <input type="checkbox" id="display-ids" />
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Display IDs of elements</span>
+          </label>
+          
+          <label class="toggle-label">
+            <input type="checkbox" id="context-menu" />
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Enable context menu</span>
+          </label>
+          
+          <label class="toggle-label">
+            <input type="checkbox" id="multi-action" />
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Enable multi actions while SHIFT is pressed</span>
+          </label>
+          <label class="toggle-label">
+            <input type="checkbox" id="multi-edit" />
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Highlight selected items when multi editing</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="options-section">
+        <h2>Search mode</h2>
+        <div class="select-wrapper">
+          <select id="search-mode">
+            <option value="disabled">Disabled</option>
+            <option value="highlight">Highlight</option>
+            <option value="filter">Filter</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="save" class="save-button">
+        <span>Save Settings</span>
+      </button>
+
+      <div class="info">
+        <p>Contao Improved - 0.0.1</p>
+        <p>With love from <a href="https://github.com/iotacb" target="_blank">@chris</a></p>
+      </div>
+
+    </div>
+
+    <script src="options.js"></script>
+  </body>
+</html>
