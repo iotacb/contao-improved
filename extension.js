@@ -51,14 +51,16 @@ const supportedByVersion = (maxVersion, minVersion = "0.0.0") => {
     }
 }
 
-const isFeatureEnabled = async (feature) => {
-    const result = await chrome.storage.sync.get({ [feature]: true });
-    return result[feature] === true;
-};
-
-const getMode = async (feature) => {
+const getSetting = async (feature) => {
     const result = await chrome.storage.sync.get({ [feature]: true });
     return result[feature];
+}
+
+function stripHtml(html)
+{
+   let tmp = document.createElement("div");
+   tmp.innerHTML = html;
+   return tmp.textContent || tmp.innerText || "";
 }
 
 window.addEventListener('load', async function () {
@@ -66,7 +68,7 @@ window.addEventListener('load', async function () {
      * Handle context menu
      */
     (async () => {
-        const enabled = await isFeatureEnabled("contextMenu")
+        const enabled = await getSetting("contextMenu");
         // Disable when not supported by version
         if (!supportedByVersion("5.5") || !enabled) {
             return;
@@ -126,7 +128,7 @@ window.addEventListener('load', async function () {
      * Display id of elements
      */
     (async () => {
-        const enabled = await isFeatureEnabled('displayIds');
+        const enabled = await getSetting('displayIds');
         if (!enabled) {
             return;
         }
@@ -136,17 +138,22 @@ window.addEventListener('load', async function () {
             const idRegex = /ID\s\d+/g.exec(entry.innerHTML);
             if (idRegex == null) return;
             const id = idRegex[0]; // Search the id inside the html
-            const idElement = document.createElement('span');
-            idElement.className = 'tl_id';
-            idElement.innerHTML = id;
 
-            entry.appendChild(idElement);
+            const right = entry.querySelectorAll('.tl_right, .tl_content_right');
+            right.forEach(right => {
+                const idElement = document.createElement('span');
+                idElement.className = 'tl_id';
+                idElement.innerHTML = id;
+                right.appendChild(idElement);
+            });
         });
     })();
 
-    // Create search bar when editing muliple
+    /**
+     * Create search bar when editing multiple settings
+     */
     (async () => {
-        const searchMode = await getMode('searchMode');
+        const searchMode = await getSetting('searchMode');
         if (searchMode == 'disabled') return;
         
         const formEdit = document.querySelector('.tl_formbody_edit');
@@ -226,5 +233,66 @@ window.addEventListener('load', async function () {
         searchBarContainer.appendChild(searchBar);
 
         fieldset.before(searchBarContainer);
+    })();
+
+    /**
+     * Handle multi actions
+     */
+    (async () => {
+        const enabled = await getSetting('tinyInfo');
+        if (!enabled) {
+            return;
+        }
+
+        const tinyEditors = document.querySelectorAll('.widget:has(.tox-tinymce)');
+        tinyEditors.forEach(editor => {
+            // Get the iframe inside the editor
+            const iframe = editor.querySelector('.tox-edit-area iframe');
+            if (!iframe) return;
+
+            // Wait for the iframe to be loaded
+            iframe.addEventListener('load', () => {
+                // Get the body inside the iframe's document
+                const textArea = iframe.contentDocument && iframe.contentDocument.body;
+                if (!textArea) return;
+
+                const menuBar = editor.querySelector('.tox-menubar');
+                if (!menuBar) return;
+
+                // Create info container and append once
+                const infoContainer = document.createElement('div');
+                infoContainer.className = 'tiny-info';
+
+                const charInfo = document.createElement('span');
+                const wordInfo = document.createElement('span');
+
+                infoContainer.appendChild(charInfo);
+                infoContainer.appendChild(wordInfo);
+
+                menuBar.appendChild(infoContainer);
+
+                // Function to update info
+                const updateInfo = () => {
+                    const text = stripHtml(textArea.innerHTML);
+                    charInfo.innerHTML = `Zeichen: ${text.length}`;
+                    // Count words: split by whitespace, filter out empty strings
+                    const words = text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length;
+                    wordInfo.innerHTML = `Wörter: ${words}`;
+                };
+
+                // Initial update
+                updateInfo();
+
+                // Update on input/change
+                textArea.addEventListener('input', updateInfo);
+            });
+
+            // If the iframe is already loaded, trigger the load handler manually
+            if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+                const event = new Event('load');
+                iframe.dispatchEvent(event);
+            }
+        });
+
     })();
 });

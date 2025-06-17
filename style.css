@@ -83,8 +83,8 @@ body.options .toggle-label .toggle-slider::before {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 body.options .toggle-label input[type=checkbox]:checked + .toggle-slider {
-  background: linear-gradient(135deg, #eaaf66 0%, #a27b4b 100%);
-  border-color: #eaac66;
+  background: linear-gradient(135deg, #f47c00 0%, #d1a167 100%);
+  border-color: #f47c00;
 }
 body.options .toggle-label input[type=checkbox]:checked + .toggle-slider::before {
   transform: translateX(20px);
@@ -130,7 +130,7 @@ body.options .select-wrapper select option {
 body.options .save-button {
   width: 100%;
   padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #eaaf66 0%, #a27b4b 100%);
+  background: linear-gradient(135deg, #f47c00 0%, #d1a167 100%);
   border: none;
   border-radius: 8px;
   color: #ffffff;
@@ -176,7 +176,7 @@ body.options .info a {
   text-decoration: underline;
 }
 body.options .info a:hover, body.options .info a:focus {
-  color: white;
+  color: #ffffff;
 }
 body.be_main .tl_file:has(input[type=checkbox]:checked) {
   background-color: var(--hover-row, #fffce1);
@@ -211,13 +211,10 @@ body.be_main .context-menu a:not(:last-child) {
 body.be_main .context-menu a:hover {
   background-color: var(--hover-row, #fffce1);
 }
-body.be_main .tl_right,
-body.be_main .tl_content_right {
-  padding-right: 9px;
-}
 body.be_main .tl_id {
   min-width: 6ch;
   opacity: 0.5;
+  padding-left: 0.5rem;
 }
 body.be_main .tl_checkbox_container {
   display: flex;
@@ -259,4 +256,14 @@ body.be_main .search-fade {
 }
 body.be_main .search-hidden {
   display: none;
+}
+body.be_main .tiny-info {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: white;
+  opacity: 0.5;
 }

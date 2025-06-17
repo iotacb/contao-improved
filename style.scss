@@ -1,9 +1,40 @@
 body {
+	// Color variables
+	$color-bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+	$color-bg-light: rgba(255, 255, 255, 0.05);
+	$color-bg-light-hover: rgba(255, 255, 255, 0.08);
+	$color-bg-toggle: rgba(255, 255, 255, 0.1);
+	$color-bg-toggle-checked: linear-gradient(135deg, #f47c00 0%, #d1a167 100%);
+	$color-bg-select-option: #2d2d2d;
+	$color-bg-save-btn: linear-gradient(135deg, #f47c00 0%, #d1a167 100%);
+	$color-bg-save-btn-hover: rgba(234, 192, 102, 0.4);
+	$color-bg-save-btn-focus: rgba(234, 201, 102, 0.3);
+
+	$color-white: #ffffff;
+	$color-gray: gray;
+	$color-gray-light: #e0e0e0;
+	$color-gray-h2: #a0a0a0;
+	$color-success: #4ade80;
+	$color-error: #f87171;
+
+	$color-border-light: rgba(255, 255, 255, 0.1);
+	$color-border-toggle: rgba(255, 255, 255, 0.2);
+	$color-border-select: rgba(255, 255, 255, 0.2);
+	$color-border-select-hover: rgba(255, 255, 255, 0.4);
+	$color-border-toggle-checked: #f47c00;
+	$color-border-save-btn: none;
+
+	$color-shadow-container: 0 20px 40px rgba(0, 0, 0, 0.3);
+	$color-shadow-toggle: 0 2px 4px rgba(0, 0, 0, 0.2);
+	$color-shadow-save-btn: 0 4px 12px rgba(234, 172, 102, 0.3);
+	$color-shadow-save-btn-hover: 0 6px 16px rgba(234, 192, 102, 0.4);
+	$color-shadow-select-focus: 0 0 0 3px rgba(102, 126, 234, 0.2);
+
 	&.options {
 		margin: 0;
 		padding: 0;
-		background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-		color: #ffffff;
+		background: $color-bg-gradient;
+		color: $color-white;
 		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
 			"Helvetica Neue", Arial, sans-serif;
 		min-width: 300px;
@@ -14,20 +45,20 @@ body {
 		overflow-y: hidden;
 
 		.options-container {
-			background: rgba(255, 255, 255, 0.05);
+			background: $color-bg-light;
 			backdrop-filter: blur(10px);
-			border: 1px solid rgba(255, 255, 255, 0.1);
+			border: 1px solid $color-border-light;
 			padding: 1rem 2rem;
 			width: 100%;
 			max-width: 400px;
-			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+			box-shadow: $color-shadow-container;
 
 			h1 {
 				margin: 0 0 1.5rem 0;
 				font-size: 1.5rem;
 				font-weight: 600;
 				text-align: center;
-				color: #ffffff;
+				color: $color-white;
 			}
 
 			h2 {
@@ -36,7 +67,7 @@ body {
 				font-weight: 500;
 				text-transform: uppercase;
 				letter-spacing: 0.5px;
-				color: #a0a0a0;
+				color: $color-gray-h2;
 			}
 		}
 
@@ -73,11 +104,11 @@ body {
 				position: relative;
 				width: 44px;
 				height: 24px;
-				background: rgba(255, 255, 255, 0.1);
+				background: $color-bg-toggle;
 				border-radius: 12px;
 				margin-right: 0.75rem;
 				transition: all 0.3s ease;
-				border: 1px solid rgba(255, 255, 255, 0.2);
+				border: 1px solid $color-border-toggle;
 				flex-shrink: 0;
 
 				&::before {
@@ -87,16 +118,16 @@ body {
 					left: 2px;
 					width: 18px;
 					height: 18px;
-					background: #ffffff;
+					background: $color-white;
 					border-radius: 50%;
 					transition: all 0.3s ease;
-					box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+					box-shadow: $color-shadow-toggle;
 				}
 			}
 
 			input[type="checkbox"]:checked+.toggle-slider {
-				background: linear-gradient(135deg, #eaaf66 0%, #a27b4b 100%);
-				border-color: #eaac66;
+				background: $color-bg-toggle-checked;
+				border-color: $color-border-toggle-checked;
 
 				&::before {
 					transform: translateX(20px);
@@ -106,7 +137,7 @@ body {
 			.toggle-text {
 				font-size: 0.9rem;
 				line-height: 1.4;
-				color: #e0e0e0;
+				color: $color-gray-light;
 			}
 		}
 
@@ -116,10 +147,10 @@ body {
 			select {
 				width: 100%;
 				padding: 0.75rem 1rem;
-				background: rgba(255, 255, 255, 0.05);
-				border: 1px solid rgba(255, 255, 255, 0.2);
+				background: $color-bg-light;
+				border: 1px solid $color-border-select;
 				border-radius: 8px;
-				color: #ffffff;
+				color: $color-white;
 				font-size: 0.9rem;
 				cursor: pointer;
 				transition: all 0.2s ease;
@@ -131,19 +162,19 @@ body {
 				padding-right: 2.5rem;
 
 				&:hover {
-					border-color: rgba(255, 255, 255, 0.4);
-					background-color: rgba(255, 255, 255, 0.08);
+					border-color: $color-border-select-hover;
+					background-color: $color-bg-light-hover;
 				}
 
 				&:focus {
 					outline: none;
 					border-color: #eaaf66;
-					box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+					box-shadow: $color-shadow-select-focus;
 				}
 
 				option {
-					background: #2d2d2d;
-					color: #ffffff;
+					background: $color-bg-select-option;
+					color: $color-white;
 				}
 			}
 		}
@@ -151,19 +182,19 @@ body {
 		.save-button {
 			width: 100%;
 			padding: 0.875rem 1.5rem;
-			background: linear-gradient(135deg, #eaaf66 0%, #a27b4b 100%);
-			border: none;
+			background: $color-bg-save-btn;
+			border: $color-border-save-btn;
 			border-radius: 8px;
-			color: #ffffff;
+			color: $color-white;
 			font-size: 0.9rem;
 			font-weight: 500;
 			cursor: pointer;
 			transition: all 0.2s ease;
-			box-shadow: 0 4px 12px rgba(234, 172, 102, 0.3);
+			box-shadow: $color-shadow-save-btn;
 
 			&:hover {
 				transform: translateY(-1px);
-				box-shadow: 0 6px 16px rgba(234, 192, 102, 0.4);
+				box-shadow: $color-shadow-save-btn-hover;
 			}
 
 			&:active {
@@ -172,7 +203,7 @@ body {
 
 			&:focus {
 				outline: none;
-				box-shadow: 0 0 0 3px rgba(234, 201, 102, 0.3);
+				box-shadow: 0 0 0 3px $color-bg-save-btn-focus;
 			}
 		}
 
@@ -189,25 +220,25 @@ body {
 			}
 
 			&.success {
-				color: #4ade80;
+				color: $color-success;
 			}
 
 			&.error {
-				color: #f87171;
+				color: $color-error;
 			}
 
 		}
 
 		.info {
 			p, a {
-				color: gray;
+				color: $color-gray;
 				text-align: center;
 			}
 
 			a {
 				text-decoration: underline;
 				&:hover, &:focus {
-					color: white;
+					color: $color-white;
 				}
 			}
 		}
@@ -255,14 +286,10 @@ body {
 			}
 		}
 
-		.tl_right,
-		.tl_content_right {
-			padding-right: 9px;
-		}
-
 		.tl_id {
 			min-width: 6ch;
 			opacity: 0.5;
+			padding-left: .5rem;
 		}
 
 		.tl_checkbox_container {
@@ -316,6 +343,17 @@ body {
 
 		.search-hidden {
 			display: none;
+		}
+
+		.tiny-info {
+			display: flex;
+			gap: .5rem;
+			align-items: center;
+			justify-content: center;
+			padding: .5rem;
+			font-size: .75rem;
+			color: white;
+			opacity: 0.5;
 		}
 	}
 }

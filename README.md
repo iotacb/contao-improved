@@ -18,6 +18,9 @@
 - **Display Element IDs:**  
   Instantly see the IDs of elements in the backend.
 
+- **Tiny Editor Info:**  
+  Display information about the content of the tiny editor.
+
 ---
 
 ## 🛠️ Feature Details
@@ -52,6 +55,15 @@ Highlight selected elements when editing multiple elements
 
 ---
 
+### Tiny Editor Info
+![Tiny Editor Info](./images/features/tinyinfo.gif)
+
+Display information about the content of the tiny editor.
+
+**Options:**  
+- Enabled  
+- Disabled
+
 ### Display IDs
 ![Display Ids](./images/features/display-ids.png)
 
@@ -73,7 +85,6 @@ Shows the ID of each element directly in the backend interface for easier refere
 
 ## 🕰️ Planned
 
-- Multi actions: Perform a action on muliple elements
 - More coming soon...
 
 ## 💡 Feedback & Contributions

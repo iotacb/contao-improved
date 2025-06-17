@@ -2,15 +2,13 @@
 const saveOptions = () => {
   const displayIds = document.getElementById('display-ids').checked;
   const contextMenu = document.getElementById('context-menu').checked;
-  const multiAction = document.getElementById('multi-action').checked;
-  const multiEdit = document.getElementById('multi-edit').checked;
+  const tinyInfo = document.getElementById('tiny-info').checked;
   const searchMode = document.getElementById('search-mode').value;
   chrome.storage.sync.set(
     {
       displayIds: displayIds,
       contextMenu: contextMenu,
-      multiAction: multiAction,
-      multiEdit: multiEdit,
+      tinyInfo: tinyInfo,
       searchMode: searchMode,
     },
 
@@ -29,15 +27,13 @@ const restoreOptions = () => {
     {
       displayIds: true,
       contextMenu: true,
-      multiAction: true,
-      multiEdit: true,
+      tinyInfo: true,
       searchMode: 'highlight',
     },
     (items) => {
       document.getElementById('display-ids').checked = items.displayIds;
       document.getElementById('context-menu').checked = items.contextMenu;
-      document.getElementById('multi-action').checked = items.multiAction;
-      document.getElementById('multi-edit').checked = items.multiEdit;
+      document.getElementById('tiny-info').checked = items.tinyInfo;
       document.getElementById('search-mode').value = items.searchMode;
     }
   );
