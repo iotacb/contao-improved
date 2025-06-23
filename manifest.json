@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Contao Improved",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Add additonal features to the contao backend",
     "icons": {
         "16": "images/icon-16.png",

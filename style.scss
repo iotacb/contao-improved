@@ -263,9 +263,12 @@ body {
 			min-width: fit-content;
 			border-radius: .5rem;
 			overflow: clip;
+			opacity: 0;
+			transition: opacity .2s, visibility .2s, transform .3s;
 
 			&.open {
 				visibility: visible;
+				opacity: 1;
 			}
 
 			a {
@@ -283,6 +286,11 @@ body {
 				&:hover {
 					background-color: var(--hover-row, #fffce1);
 				}
+			}
+
+			@starting-style {
+				opacity: 0;
+				visibility: hidden;
 			}
 		}
 

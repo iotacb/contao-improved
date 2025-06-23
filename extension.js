@@ -58,12 +58,14 @@ const getSetting = async (feature) => {
 
 function stripHtml(html)
 {
-   let tmp = document.createElement("div");
-   tmp.innerHTML = html;
-   return tmp.textContent || tmp.innerText || "";
+    let tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || "";
 }
 
 window.addEventListener('load', async function () {
+    const ciEnabled = await getSetting("ci");
+    if (!ciEnabled) return;
     /**
      * Handle context menu
      */
@@ -75,7 +77,7 @@ window.addEventListener('load', async function () {
         }
 
         // TODO: Currently only works on lists that are displayed in an 'ul' element. Some pages use a 'table' element instead. Also support this.
-        const entries = this.document.querySelectorAll('.tl_file, .tl_content, .tl_folder');
+        const entries = this.document.querySelectorAll('.tl_file, .tl_content, .tl_folder, tr');
 
         // Create context menu element
         const contextMenu = document.createElement('div');
@@ -100,7 +102,7 @@ window.addEventListener('load', async function () {
                 contextMenu.style.top = `${posY}px`;
                 contextMenu.innerHTML = '';
 
-                const actions = entry.querySelectorAll('.tl_right a, .tl_content_right a');
+                const actions = entry.querySelectorAll('.tl_right a, .tl_content_right a, .tl_right_nowrap a');
                 if (actions.length === 0) {
                     contextMenu.classList.remove('open');
                     contextMenu.innerHTML = '';
@@ -119,7 +121,12 @@ window.addEventListener('load', async function () {
         window.addEventListener('click', (e) => {
             if (contextMenu.classList.contains('open')) {
                 contextMenu.classList.remove('open');
-                contextMenu.innerHTML = '';
+
+                const removeContent = () => {
+                    contextMenu.innerHTML = '';
+                    contextMenu.removeEventListener('transitionend', removeContent);
+                }
+                contextMenu.addEventListener('transitionend', removeContent);
             }
         });
     })();
@@ -133,13 +140,13 @@ window.addEventListener('load', async function () {
             return;
         }
 
-        const entries = this.document.querySelectorAll('.tl_file, .tl_content, .tl_folder');
+        const entries = this.document.querySelectorAll('.tl_file, .tl_content, .tl_folder, tr');
         entries.forEach(entry => {
             const idRegex = /ID\s\d+/g.exec(entry.innerHTML);
             if (idRegex == null) return;
             const id = idRegex[0]; // Search the id inside the html
 
-            const right = entry.querySelectorAll('.tl_right, .tl_content_right');
+            const right = entry.querySelectorAll('.tl_right, .tl_content_right, .tl_right_nowrap');
             right.forEach(right => {
                 const idElement = document.createElement('span');
                 idElement.className = 'tl_id';
@@ -236,7 +243,7 @@ window.addEventListener('load', async function () {
     })();
 
     /**
-     * Handle multi actions
+     * Handle extra tiny infos
      */
     (async () => {
         const enabled = await getSetting('tinyInfo');
@@ -294,5 +301,32 @@ window.addEventListener('load', async function () {
             }
         });
 
+    })();
+
+    /**
+     * Add useful shortcuts
+     */
+    (async () => {
+        const enabled = await getSetting('shortcuts');
+        if (!enabled) {
+            return;
+        }
+
+        // tiny link shortcut
+        const tinyEditorIframe = this.document.querySelector(".tox-editor-container iframe");
+        if (!tinyEditorIframe) return;
+         
+        const tinyDocument = tinyEditorIframe.contentDocument || tinyEditorIframe.contentWindow.document;
+        const tinyToolbar = document.querySelector('.tox-toolbar__primary');
+        const tinyLinkGroup = tinyToolbar.querySelector('.tox-toolbar__group:first-of-type');
+        const addLink = tinyLinkGroup.querySelector('button:first-of-type');
+
+        // the text area is inside in an iframe
+        // so we have to add the listener to the iframes document
+        tinyDocument.addEventListener('keyup', (e) => {
+            if (e.ctrlKey && e.altKey && e.code == 'KeyL') {
+                addLink.click();
+            }
+        });
     })();
 });

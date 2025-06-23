@@ -21,6 +21,9 @@
 - **Tiny Editor Info:**  
   Display information about the content of the tiny editor.
 
+- **Extra Shortcuts:**
+  New useful shortcuts
+
 ---
 
 ## 🛠️ Feature Details
@@ -68,6 +71,19 @@ Display information about the content of the tiny editor.
 ![Display Ids](./images/features/display-ids.png)
 
 Shows the ID of each element directly in the backend interface for easier reference.
+
+**Options:**  
+- Enabled  
+- Disabled
+
+### Shortcuts
+
+New shortcuts to ease the usage of Contao.
+
+New added shortcuts:
+
+Tiny Editor:
+- `CTRL` **+** `SHIFT` **+** `L`: Add new link
 
 **Options:**  
 - Enabled  

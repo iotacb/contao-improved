@@ -193,9 +193,12 @@ body.be_main .context-menu {
   min-width: fit-content;
   border-radius: 0.5rem;
   overflow: clip;
+  opacity: 0;
+  transition: opacity 0.2s, visibility 0.2s, transform 0.3s;
 }
 body.be_main .context-menu.open {
   visibility: visible;
+  opacity: 1;
 }
 body.be_main .context-menu a {
   display: flex;
@@ -210,6 +213,12 @@ body.be_main .context-menu a:not(:last-child) {
 }
 body.be_main .context-menu a:hover {
   background-color: var(--hover-row, #fffce1);
+}
+@starting-style {
+  body.be_main .context-menu {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 body.be_main .tl_id {
   min-width: 6ch;
