@@ -66,6 +66,7 @@ function stripHtml(html)
 window.addEventListener('load', async function () {
     const ciEnabled = await getSetting("ci");
     if (!ciEnabled) return;
+
     /**
      * Handle context menu
      */
@@ -315,7 +316,7 @@ window.addEventListener('load', async function () {
         // tiny link shortcut
         const tinyEditorIframe = this.document.querySelector(".tox-editor-container iframe");
         if (!tinyEditorIframe) return;
-         
+        
         const tinyDocument = tinyEditorIframe.contentDocument || tinyEditorIframe.contentWindow.document;
         const tinyToolbar = document.querySelector('.tox-toolbar__primary');
         const tinyLinkGroup = tinyToolbar.querySelector('.tox-toolbar__group:first-of-type');
@@ -328,5 +329,51 @@ window.addEventListener('load', async function () {
                 addLink.click();
             }
         });
+    })();
+
+    /**
+     * Convert element infos to copy links
+     */
+    (async () => {
+        // TODO: ADD FEATURE TOGGLE
+
+        // check when element with id "simple-modal-overlay" is created or deleted
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                if (mutation.type === 'childList') {
+                    const modalOverlay = document.querySelector('.simple-modal');
+                    if (modalOverlay) {
+                        handleModal(modalOverlay);
+                    }
+                }
+            });
+        });
+
+        // Start observing the document body for child list changes
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        const handleModal = (modal) => {
+            const modalIFrame = document.querySelector('.simple-modal iframe');
+            if (!modalIFrame) return;
+            // when i frame is loaded, add the click listener to the table rows
+            modalIFrame.addEventListener('load', () => {
+                const rows = modalIFrame.contentDocument.querySelectorAll('table tr td:not(:has(span))');
+                rows.forEach(row => {
+                    row.innerHTML = `<a href="#" class="copy-link">${row.innerHTML}</a>`;
+                    row.style.textDecoration = 'underline';
+                    row.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const text = row.innerText;
+                        navigator.clipboard.writeText(text);
+
+                        // TODO: ADD FEATURE TOGGLE
+                        const closeBtn = modal.querySelector('a.close');
+                        if (closeBtn) {
+                            closeBtn.click();
+                        }
+                    });
+                });
+            });
+        };
     })();
 });
