@@ -4,6 +4,8 @@ const saveOptions = () => {
   const contextMenu = document.getElementById('context-menu').checked;
   const tinyInfo = document.getElementById('tiny-info').checked;
   const shortcuts = document.getElementById('shortcuts').checked;
+  const elementInfo = document.getElementById('element-info').checked;
+  const elementInfoAutoClose = document.getElementById('element-info-auto-close').checked;
   const ci = document.getElementById('ci-enabled').checked;
   const searchMode = document.getElementById('search-mode').value;
   chrome.storage.sync.set(
@@ -12,6 +14,8 @@ const saveOptions = () => {
       contextMenu: contextMenu,
       tinyInfo: tinyInfo,
       shortcuts: shortcuts,
+      elementInfo: elementInfo,
+      elementInfoAutoClose: elementInfoAutoClose,
       ci: ci,
       searchMode: searchMode,
     },
@@ -33,6 +37,8 @@ const restoreOptions = () => {
       contextMenu: true,
       tinyInfo: true,
       shortcuts: true,
+      elementInfo: true,
+      elementInfoAutoClose: true,
       ci: true,
       searchMode: 'highlight',
     },
@@ -41,6 +47,8 @@ const restoreOptions = () => {
       document.getElementById('context-menu').checked = items.contextMenu;
       document.getElementById('tiny-info').checked = items.tinyInfo;
       document.getElementById('shortcuts').checked = items.shortcuts;
+      document.getElementById('element-info').checked = items.elementInfo;
+      document.getElementById('element-info-auto-close').checked = items.elementInfoAutoClose;
       document.getElementById('ci-enabled').checked = items.ci;
       document.getElementById('search-mode').value = items.searchMode;
     }

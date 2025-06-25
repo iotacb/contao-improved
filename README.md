@@ -24,6 +24,9 @@
 - **Extra Shortcuts:**
   New useful shortcuts
 
+- **Element Info improvements:**
+  Make infos displayed in the element info modal copyable.
+
 ---
 
 ## 🛠️ Feature Details
@@ -89,6 +92,23 @@ Tiny Editor:
 - Enabled  
 - Disabled
 
+### Element Info improvements
+
+Make infos displayed in the element info modal copyable.
+
+![Element Info improvements](./images/features/element-info.gif)
+
+**Options:**
+- Enabled
+- Disabled
+- Auto-close modal after copy
+
+---
+
+
+
+
+
 ---
 
 ## 🚀 Getting Started
@@ -98,10 +118,6 @@ Tiny Editor:
 3. **Configure** the extension options to fit your workflow.
 
 ---
-
-## 🕰️ Planned
-
-- More coming soon...
 
 ## 💡 Feedback & Contributions
 

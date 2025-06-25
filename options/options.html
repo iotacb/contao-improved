@@ -1,73 +1,91 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Contao Improved - Options</title>
-    <link rel="stylesheet" href="../style.css" />
-  </head>
-  <body class="options">
-    <div class="options-container">
-      <h1>Settings</h1>
-      <div class="options-section">
-        <h2>Extension Options</h2>
-        <div class="option-group">
-          <label class="toggle-label">
-            <input type="checkbox" id="ci-enabled" />
-            <span class="toggle-slider"></span>
-            <span class="toggle-text">Enable or disable the extension</span>
-          </label>
-        </div>
-      </div>
-      <div class="options-section">
-        <h2>Display Options</h2>
-        <div class="option-group">
-          <label class="toggle-label">
-            <input type="checkbox" id="display-ids" />
-            <span class="toggle-slider"></span>
-            <span class="toggle-text">Display IDs of elements</span>
-          </label>
-          
-          <label class="toggle-label">
-            <input type="checkbox" id="context-menu" />
-            <span class="toggle-slider"></span>
-            <span class="toggle-text">Enable context menu</span>
-          </label>
-          
-          <label class="toggle-label">
-            <input type="checkbox" id="tiny-info" />
-            <span class="toggle-slider"></span>
-            <span class="toggle-text">Display additional information in the tiny editor</span>
-          </label>
+	<head>
+		<title>Contao Improved - Options</title>
+		<link rel="stylesheet" href="../style.css" />
+	</head>
+	<body class="options">
+		<div class="options-container">
+			<h1>Settings</h1>
+			<div class="options-section">
+				<h2>Extension Options</h2>
+				<div class="option-group">
+					<label class="toggle-label">
+						<input type="checkbox" id="ci-enabled" />
+						<span class="toggle-slider"></span>
+						<span class="toggle-text">Enable or disable the extension</span>
+					</label>
+				</div>
+			</div>
+			<div class="options-section">
+				<h2>Display Options</h2>
+				<div class="option-group">
+					<label class="toggle-label">
+						<input type="checkbox" id="display-ids" />
+						<span class="toggle-slider"></span>
+						<span class="toggle-text">Display IDs of elements</span>
+					</label>
 
-          <label class="toggle-label">
-            <input type="checkbox" id="shortcuts" />
-            <span class="toggle-slider"></span>
-            <span class="toggle-text">Add useful shortcuts</span>
-          </label>
-        </div>
-      </div>
+					<label class="toggle-label">
+						<input type="checkbox" id="context-menu" />
+						<span class="toggle-slider"></span>
+						<span class="toggle-text">Enable context menu</span>
+					</label>
 
-      <div class="options-section">
-        <h2>Search mode</h2>
-        <div class="select-wrapper">
-          <select id="search-mode">
-            <option value="disabled">Disabled</option>
-            <option value="highlight">Highlight</option>
-            <option value="filter">Filter</option>
-          </select>
-        </div>
-      </div>
+					<label class="toggle-label">
+						<input type="checkbox" id="tiny-info" />
+						<span class="toggle-slider"></span>
+						<span class="toggle-text"
+							>Display additional information in the tiny editor</span
+						>
+					</label>
 
-      <button id="save" class="save-button">
-        <span>Save Settings</span>
-      </button>
+					<label class="toggle-label">
+						<input type="checkbox" id="shortcuts" />
+						<span class="toggle-slider"></span>
+						<span class="toggle-text">Add useful shortcuts</span>
+					</label>
 
-      <div class="info">
-        <p>Contao Improved - <span id="extension-version"></span></p>
-        <p>With love from <a href="https://github.com/iotacb" target="_blank">@chris</a></p>
-      </div>
+					<label class="toggle-label">
+						<input type="checkbox" id="element-info" />
+						<span class="toggle-slider"></span>
+						<span class="toggle-text">Make element info copyable</span>
+					</label>
 
-    </div>
+					<label class="toggle-label">
+						<input type="checkbox" id="element-info-auto-close" />
+						<span class="toggle-slider"></span>
+						<span class="toggle-text"
+							>Automatically close element info modal after copy</span
+						>
+					</label>
+				</div>
+			</div>
 
-    <script src="options.js"></script>
-  </body>
+			<div class="options-section">
+				<h2>Search mode</h2>
+				<div class="select-wrapper">
+					<select id="search-mode">
+						<option value="disabled">Disabled</option>
+						<option value="highlight">Highlight</option>
+						<option value="filter">Filter</option>
+					</select>
+				</div>
+			</div>
+
+			<button id="save" class="save-button">
+				<span>Save Settings</span>
+			</button>
+
+			<div class="info">
+				<p>Contao Improved - <span id="extension-version"></span></p>
+				<p>
+					With love from
+					<a href="https://github.com/iotacb" target="_blank">@chris</a>
+				</p>
+			</div>
+		</div>
+
+		<script src="options.js"></script>
+	</body>
 </html>
