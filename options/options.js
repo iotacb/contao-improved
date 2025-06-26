@@ -6,8 +6,10 @@ const saveOptions = () => {
   const shortcuts = document.getElementById('shortcuts').checked;
   const elementInfo = document.getElementById('element-info').checked;
   const elementInfoAutoClose = document.getElementById('element-info-auto-close').checked;
+  const autoPublished = document.getElementById('auto-published').checked;
   const ci = document.getElementById('ci-enabled').checked;
   const searchMode = document.getElementById('search-mode').value;
+  const searchAutoFocus = document.getElementById('search-auto-focus').checked;
   chrome.storage.sync.set(
     {
       displayIds: displayIds,
@@ -16,8 +18,10 @@ const saveOptions = () => {
       shortcuts: shortcuts,
       elementInfo: elementInfo,
       elementInfoAutoClose: elementInfoAutoClose,
+      autoPublished: autoPublished,
       ci: ci,
       searchMode: searchMode,
+      searchAutoFocus: searchAutoFocus,
     },
 
     () => {
@@ -39,8 +43,10 @@ const restoreOptions = () => {
       shortcuts: true,
       elementInfo: true,
       elementInfoAutoClose: true,
+      autoPublished: true,
       ci: true,
       searchMode: 'highlight',
+      searchAutoFocus: true,
     },
     (items) => {
       document.getElementById('display-ids').checked = items.displayIds;
@@ -49,8 +55,10 @@ const restoreOptions = () => {
       document.getElementById('shortcuts').checked = items.shortcuts;
       document.getElementById('element-info').checked = items.elementInfo;
       document.getElementById('element-info-auto-close').checked = items.elementInfoAutoClose;
+      document.getElementById('auto-published').checked = items.autoPublished;
       document.getElementById('ci-enabled').checked = items.ci;
       document.getElementById('search-mode').value = items.searchMode;
+      document.getElementById('search-auto-focus').checked = items.searchAutoFocus;
     }
   );
 };

@@ -27,6 +27,9 @@
 - **Element Info improvements:**
   Make infos displayed in the element info modal copyable.
 
+- **Auto Published**
+  When creating new pages or articles, set them to published automatically.
+
 ---
 
 ## 🛠️ Feature Details
@@ -51,6 +54,7 @@ Introduces a search bar on the "edit multiple" screen to help you quickly locate
 - **Highlight:** Highlights matching settings as you type.  
 - **Filter:** Only displays settings that match your search.  
 - **Disabled:** Hides the search bar.
+- **Auto Focus:** Automatically focuses the search bar when entering the "edit multiple" page.
 
 ---
 
@@ -96,18 +100,22 @@ Tiny Editor:
 
 Make infos displayed in the element info modal copyable.
 
-![Element Info improvements](./images/features/element-info.gif)
+![Element Info improvements](./images/features/info-copy.gif)
 
 **Options:**
 - Enabled
 - Disabled
 - Auto-close modal after copy
 
----
+### Auto Published
 
+When creating new pages or articles, set them to published automatically.
 
+![Auto Published](./images/features/gif_missing.gif)
 
-
+**Options:**
+- Enabled
+- Disabled
 
 ---
 

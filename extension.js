@@ -176,6 +176,8 @@ window.addEventListener("load", async function () {
 		const searchMode = await getSetting("searchMode");
 		if (searchMode == "disabled") return;
 
+		const searchAutoFocus = await getSetting("searchAutoFocus");
+
 		const formEdit = document.querySelector(".tl_formbody_edit");
 		if (formEdit == null) return;
 
@@ -268,6 +270,11 @@ window.addEventListener("load", async function () {
 		searchBarContainer.appendChild(searchBar);
 
 		fieldset.before(searchBarContainer);
+
+		if (searchAutoFocus) {
+			// Focus the search bar automatically
+			searchBar.focus();
+		}
 	})();
 
 	/**
@@ -378,10 +385,13 @@ window.addEventListener("load", async function () {
 
 		const autoClose = await getSetting("elementInfoAutoClose");
 
+		// TODO: ADD NOTIFICATION WHEN COPIED
+
 		// Function to add copy functionality to table rows
 		const addCopyFunctionality = (document, modal = null) => {
+			console.log(document.querySelectorAll('*'));
 			const rows = document.querySelectorAll(
-				"table tr td:not(:has(span), .tl_label)"
+				"body table tr td:not(:has(span), .tl_label)"
 			);
 			rows.forEach((row) => {
 				// Skip if already processed
@@ -433,7 +443,7 @@ window.addEventListener("load", async function () {
 		// Check if we're directly on a page that contains the table (opened in new tab)
 		// Look for typical Contao admin table structures
 		const directPageTable = document.querySelector(
-			"table tr td:not(:has(span), .tl_label)"
+			"body:not(.be_main) table tr td:not(:has(span), .tl_label)"
 		);
 		if (directPageTable) {
 			// We're on the direct page, add functionality immediately
@@ -477,5 +487,49 @@ window.addEventListener("load", async function () {
 				addCopyFunctionality(modalIFrame.contentDocument, modal);
 			});
 		};
+	})();
+
+	/**
+	 * Auto pulished pages and articles
+	 */
+	(async () => {
+		const enabled = await getSetting("autoPublished");
+		if (!enabled) {
+			return;
+		}
+		
+		// get all mandatory fields
+		const mandatoryFields = document.querySelectorAll(
+			".mandatory:is(input, textarea, select)"
+		);
+
+		if (mandatoryFields.length === 0) {
+			return;
+		}
+
+		// When the mandatory fields are empty, when loading the edit page,
+		// we can assume that the user is creating a new page or article.
+		let hasEmptyMandatory = false;
+		mandatoryFields.forEach((field) => {
+			if (field.value.trim() === "") {
+				hasEmptyMandatory = true;
+			}
+		});
+
+		if (!hasEmptyMandatory) {
+			return;
+		}
+
+		const publishedContainer = document.querySelector('#ctrl_published');
+		if (!publishedContainer) {
+			return;
+		}
+
+		const publishedCheckbox = publishedContainer.querySelector('input[type="checkbox"]');
+		if (!publishedCheckbox) {
+			return;
+		}
+
+		publishedCheckbox.checked = true; // Set the checkbox to checked
 	})();
 });

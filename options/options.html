@@ -13,12 +13,12 @@
 					<label class="toggle-label">
 						<input type="checkbox" id="ci-enabled" />
 						<span class="toggle-slider"></span>
-						<span class="toggle-text">Enable or disable the extension</span>
+						<span title="Enable or disable all features of the extension" class="toggle-text">Enable or disable the extension</span>
 					</label>
 				</div>
 			</div>
 			<div class="options-section">
-				<h2>Display Options</h2>
+				<h2>Features</h2>
 				<div class="option-group">
 					<label class="toggle-label">
 						<input type="checkbox" id="display-ids" />
@@ -55,9 +55,14 @@
 					<label class="toggle-label">
 						<input type="checkbox" id="element-info-auto-close" />
 						<span class="toggle-slider"></span>
-						<span class="toggle-text"
-							>Automatically close element info modal after copy</span
+						<span class="toggle-text">Automatically close element info modal after copy</span
 						>
+					</label>
+
+					<label class="toggle-label">
+						<input type="checkbox" id="auto-published" />
+						<span class="toggle-slider"></span>
+						<span class="toggle-text">When creating new pages or articles, set them to published</span>
 					</label>
 				</div>
 			</div>
@@ -71,6 +76,11 @@
 						<option value="filter">Filter</option>
 					</select>
 				</div>
+				<label class="toggle-label">
+						<input type="checkbox" id="search-auto-focus" />
+						<span class="toggle-slider"></span>
+						<span class="toggle-text">Automatically focus search input</span>
+				</label>
 			</div>
 
 			<button id="save" class="save-button">
