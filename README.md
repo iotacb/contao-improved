@@ -111,7 +111,7 @@ Make infos displayed in the element info modal copyable.
 
 When creating new pages or articles, set them to published automatically.
 
-![Auto Published](./images/features/gif_missing.gif)
+![Auto Published](./images/features/auto_published.gif)
 
 **Options:**
 - Enabled
