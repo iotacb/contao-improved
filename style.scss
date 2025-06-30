@@ -1,12 +1,12 @@
 body {
 	// Color variables
-	$color-bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+	$color-bg-gradient: #202123;
 	$color-bg-light: rgba(255, 255, 255, 0.05);
 	$color-bg-light-hover: rgba(255, 255, 255, 0.08);
 	$color-bg-toggle: rgba(255, 255, 255, 0.1);
-	$color-bg-toggle-checked: linear-gradient(135deg, #f47c00 0%, #d1a167 100%);
+	$color-bg-toggle-checked: #f47c00;
 	$color-bg-select-option: #2d2d2d;
-	$color-bg-save-btn: linear-gradient(135deg, #f47c00 0%, #d1a167 100%);
+	$color-bg-save-btn: #f47c00;
 	$color-bg-save-btn-hover: rgba(234, 192, 102, 0.4);
 	$color-bg-save-btn-focus: rgba(234, 201, 102, 0.3);
 
@@ -33,11 +33,11 @@ body {
 	&.options {
 		margin: 0;
 		padding: 0;
-		background: $color-bg-gradient;
+		background: #202020;
 		color: $color-white;
 		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
 			"Helvetica Neue", Arial, sans-serif;
-		min-width: 300px;
+		min-width: 25rem;
 		min-height: fit-content;
 		display: flex;
 		align-items: center;
@@ -45,24 +45,26 @@ body {
 		overflow-y: hidden;
 
 		.options-container {
-			background: $color-bg-light;
-			backdrop-filter: blur(10px);
 			border: 1px solid $color-border-light;
-			padding: 1rem 2rem;
+			// padding: 1rem 2rem;
 			width: 100%;
 			max-width: 400px;
 			box-shadow: $color-shadow-container;
 
+			> * {
+				padding: 1rem;
+			}
+
 			h1 {
-				margin: 0 0 1.5rem 0;
+				padding: unset;
 				font-size: 1.5rem;
 				font-weight: 600;
 				text-align: center;
 				color: $color-white;
+				margin-bottom: unset;
 			}
 
 			h2 {
-				margin: 0 0 1rem 0;
 				font-size: 0.9rem;
 				font-weight: 500;
 				text-transform: uppercase;
@@ -72,7 +74,8 @@ body {
 		}
 
 		.options-section {
-			margin-bottom: 2rem;
+
+			border-bottom: 1px solid $color-border-light;
 
 			&:last-of-type {
 				margin-bottom: 1.5rem;
@@ -190,11 +193,9 @@ body {
 			font-weight: 500;
 			cursor: pointer;
 			transition: all 0.2s ease;
-			box-shadow: $color-shadow-save-btn;
 
 			&:hover {
 				transform: translateY(-1px);
-				box-shadow: $color-shadow-save-btn-hover;
 			}
 
 			&:active {
@@ -230,6 +231,8 @@ body {
 		}
 
 		.info {
+			padding-top: unset;
+			
 			p, a {
 				color: $color-gray;
 				text-align: center;

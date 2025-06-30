@@ -1,10 +1,10 @@
 body.options {
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  background: #202020;
   color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  min-width: 300px;
+  min-width: 25rem;
   min-height: fit-content;
   display: flex;
   align-items: center;
@@ -12,23 +12,23 @@ body.options {
   overflow-y: hidden;
 }
 body.options .options-container {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1rem 2rem;
   width: 100%;
   max-width: 400px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
+body.options .options-container > * {
+  padding: 1rem;
+}
 body.options .options-container h1 {
-  margin: 0 0 1.5rem 0;
+  padding: unset;
   font-size: 1.5rem;
   font-weight: 600;
   text-align: center;
   color: #ffffff;
+  margin-bottom: unset;
 }
 body.options .options-container h2 {
-  margin: 0 0 1rem 0;
   font-size: 0.9rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -36,7 +36,7 @@ body.options .options-container h2 {
   color: #a0a0a0;
 }
 body.options .options-section {
-  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 body.options .options-section:last-of-type {
   margin-bottom: 1.5rem;
@@ -83,7 +83,7 @@ body.options .toggle-label .toggle-slider::before {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 body.options .toggle-label input[type=checkbox]:checked + .toggle-slider {
-  background: linear-gradient(135deg, #f47c00 0%, #d1a167 100%);
+  background: #f47c00;
   border-color: #f47c00;
 }
 body.options .toggle-label input[type=checkbox]:checked + .toggle-slider::before {
@@ -130,7 +130,7 @@ body.options .select-wrapper select option {
 body.options .save-button {
   width: 100%;
   padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #f47c00 0%, #d1a167 100%);
+  background: #f47c00;
   border: none;
   border-radius: 8px;
   color: #ffffff;
@@ -138,11 +138,9 @@ body.options .save-button {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(234, 172, 102, 0.3);
 }
 body.options .save-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(234, 192, 102, 0.4);
 }
 body.options .save-button:active {
   transform: translateY(0);
@@ -167,6 +165,9 @@ body.options .status-message.success {
 }
 body.options .status-message.error {
   color: #f87171;
+}
+body.options .info {
+  padding-top: unset;
 }
 body.options .info p, body.options .info a {
   color: gray;

@@ -69,23 +69,27 @@
 
 			<div class="options-section">
 				<h2>Search mode</h2>
-				<div class="select-wrapper">
-					<select id="search-mode">
-						<option value="disabled">Disabled</option>
-						<option value="highlight">Highlight</option>
-						<option value="filter">Filter</option>
-					</select>
+				<div class="option-group">
+					<div class="select-wrapper">
+						<select id="search-mode">
+							<option value="disabled">Disabled</option>
+							<option value="highlight">Highlight</option>
+							<option value="filter">Filter</option>
+						</select>
+					</div>
+					<label class="toggle-label">
+							<input type="checkbox" id="search-auto-focus" />
+							<span class="toggle-slider"></span>
+							<span class="toggle-text">Automatically focus search input</span>
+					</label>
 				</div>
-				<label class="toggle-label">
-						<input type="checkbox" id="search-auto-focus" />
-						<span class="toggle-slider"></span>
-						<span class="toggle-text">Automatically focus search input</span>
-				</label>
 			</div>
 
-			<button id="save" class="save-button">
-				<span>Save Settings</span>
-			</button>
+			<div>
+				<button id="save" class="save-button">
+					<span>Save Settings</span>
+				</button>
+			</div>
 
 			<div class="info">
 				<p>Contao Improved - <span id="extension-version"></span></p>
