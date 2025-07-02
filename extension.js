@@ -490,7 +490,7 @@ window.addEventListener("load", async function () {
 	})();
 
 	/**
-	 * Auto pulished pages and articles
+	 * Auto published pages and articles
 	 */
 	(async () => {
 		const enabled = await getSetting("autoPublished");
@@ -531,5 +531,20 @@ window.addEventListener("load", async function () {
 		}
 
 		publishedCheckbox.checked = true; // Set the checkbox to checked
+	})();
+
+	/**
+	 * Better styling
+	 */
+	(async () => {
+		const enabled = await getSetting("betterStyling");
+		if (!enabled) {
+			return;
+		}
+
+		const style = document.createElement("link");
+		style.rel = "stylesheet";
+		style.href = chrome.runtime.getURL("./assets/style_be.css");
+		document.head.appendChild(style);
 	})();
 });

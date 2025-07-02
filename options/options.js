@@ -7,6 +7,7 @@ const saveOptions = () => {
   const elementInfo = document.getElementById('element-info').checked;
   const elementInfoAutoClose = document.getElementById('element-info-auto-close').checked;
   const autoPublished = document.getElementById('auto-published').checked;
+  const betterStyling = document.getElementById('better-styling').checked;
   const ci = document.getElementById('ci-enabled').checked;
   const searchMode = document.getElementById('search-mode').value;
   const searchAutoFocus = document.getElementById('search-auto-focus').checked;
@@ -19,6 +20,7 @@ const saveOptions = () => {
       elementInfo: elementInfo,
       elementInfoAutoClose: elementInfoAutoClose,
       autoPublished: autoPublished,
+      betterStyling: betterStyling,
       ci: ci,
       searchMode: searchMode,
       searchAutoFocus: searchAutoFocus,
@@ -29,7 +31,10 @@ const saveOptions = () => {
         chrome.tabs.reload(tabs[0].id);
       });
     }
-  )
+  );
+
+  // close the popup window
+  window.close();
 };
 
 // Restores select box and checkbox state using the preferences
@@ -44,6 +49,7 @@ const restoreOptions = () => {
       elementInfo: true,
       elementInfoAutoClose: true,
       autoPublished: true,
+      betterStyling: true,
       ci: true,
       searchMode: 'highlight',
       searchAutoFocus: true,
@@ -56,6 +62,7 @@ const restoreOptions = () => {
       document.getElementById('element-info').checked = items.elementInfo;
       document.getElementById('element-info-auto-close').checked = items.elementInfoAutoClose;
       document.getElementById('auto-published').checked = items.autoPublished;
+      document.getElementById('better-styling').checked = items.betterStyling;
       document.getElementById('ci-enabled').checked = items.ci;
       document.getElementById('search-mode').value = items.searchMode;
       document.getElementById('search-auto-focus').checked = items.searchAutoFocus;

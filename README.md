@@ -117,6 +117,16 @@ When creating new pages or articles, set them to published automatically.
 - Enabled
 - Disabled
 
+### Styling improvements
+
+Improves the visual appearance and also the usability of the Contao backend.
+
+<!-- ![Styling improvements](./images/features/styling_improvements.gif) -->
+
+**Options:**
+- Enabled
+- Disabled
+
 ---
 
 ## 🚀 Getting Started
