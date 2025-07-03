@@ -30,6 +30,9 @@
 - **Auto Published**
   When creating new pages or articles, set them to published automatically.
 
+- **Styling Improvements:**
+  Enhances the visual appearance and usability of the Contao backend.
+
 ---
 
 ## 🛠️ Feature Details

@@ -152,6 +152,9 @@ window.addEventListener("load", async function () {
 		const entries = this.document.querySelectorAll(
 			".tl_file, .tl_content, .tl_folder, tr"
 		);
+
+		let idElements = [];
+
 		entries.forEach((entry) => {
 			const idRegex = /ID\s\d+/g.exec(entry.innerHTML);
 			if (idRegex == null) return;
@@ -164,8 +167,24 @@ window.addEventListener("load", async function () {
 				const idElement = document.createElement("span");
 				idElement.className = "tl_id";
 				idElement.innerHTML = id;
+				idElements.push(idElement);
 				right.appendChild(idElement);
 			});
+		});
+
+		let widestId = 0;
+		idElements.forEach((idElement) => {
+			const computedStyle = window.getComputedStyle(idElement);
+			const paddingLeft = parseFloat(computedStyle.paddingLeft);
+			const paddingRight = parseFloat(computedStyle.paddingRight);
+			const width = idElement.clientWidth - paddingLeft - paddingRight;
+			if (width > widestId) {
+				widestId = width;
+			}
+		});
+
+		idElements.forEach((idElement) => {
+			idElement.style.width = `${widestId}px`;
 		});
 	})();
 

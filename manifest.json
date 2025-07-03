@@ -21,7 +21,16 @@
 			]
 		}
 	],
-	"permissions": ["storage"],
+	"background": {
+		"service_worker": "service-worker.js"
+	},
+	"permissions": ["storage", "declarativeNetRequest"],
+	"host_permissions": [
+		"https://*/contao*",
+		"https://*/contao/*",
+		"http://*/contao*",
+		"http://*/contao/*"
+	],
 	"options_page": "options/options.html",
 	"action": {
 		"default_popup": "options/options.html"

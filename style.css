@@ -222,9 +222,9 @@ body.be_main .context-menu a:hover {
   }
 }
 body.be_main .tl_id {
-  min-width: 6ch;
   opacity: 0.5;
-  padding-left: 0.5rem;
+  padding-left: 2rem;
+  display: inline-block;
 }
 body.be_main .tl_checkbox_container {
   display: flex;
