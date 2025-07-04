@@ -301,6 +301,7 @@ body {
 			opacity: 0.5;
 			padding-left: 2rem;
 			display: inline-block;
+			text-wrap: nowrap;
 		}
 
 		.tl_checkbox_container {
@@ -310,7 +311,6 @@ body {
 			align-items: start;
 			justify-content: start;
 			margin-bottom: .25rem;
-
 
 			legend {
 				display: inline-block;

@@ -1,5 +1,12 @@
-fieldset.tl_box legend, fieldset.tl_box button {
+fieldset.tl_box > legend {
   width: 100%;
+}
+fieldset.tl_box > legend > button {
+  width: 100%;
+}
+
+#paste_hint p, .sort_hint {
+  pointer-events: none;
 }
 
 .tl_panel:has(> .tl_submit_panel) {
@@ -27,4 +34,9 @@ fieldset.tl_box legend, fieldset.tl_box button {
 }
 .tl_panel:has(> .tl_submit_panel) .tl_submit_panel > button:hover {
   background-color: var(--form-bg-hover, #f6f6f6);
+}
+
+.tl_formbody :has(.active) .tl_submit_panel > button:last-child {
+  opacity: unset !important;
+  pointer-events: unset !important;
 }

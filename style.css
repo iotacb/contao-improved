@@ -225,6 +225,7 @@ body.be_main .tl_id {
   opacity: 0.5;
   padding-left: 2rem;
   display: inline-block;
+  text-wrap: nowrap;
 }
 body.be_main .tl_checkbox_container {
   display: flex;

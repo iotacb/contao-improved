@@ -1,8 +1,16 @@
 // make fieldsets more easy to open/close
 fieldset.tl_box {
-    legend, button {
+    > legend {
         width: 100%;
+        
+        > button {
+            width: 100%;
+        }
     }
+}
+
+#paste_hint p, .sort_hint {
+    pointer-events: none;
 }
 
 // make filter buttons better
@@ -33,6 +41,15 @@ fieldset.tl_box {
             &:hover {
                 background-color: var(--form-bg-hover, #f6f6f6);
             }
+        }
+    }
+}
+
+.tl_formbody {
+    :has(.active) {
+        .tl_submit_panel > button:last-child {
+            opacity: unset !important;
+            pointer-events: unset !important;
         }
     }
 }
