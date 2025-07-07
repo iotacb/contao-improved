@@ -256,6 +256,86 @@ const iconRules = [
         id: 51,
         urlFilter: "*/system/themes/flexible/icons/copychildren--dark.svg",
         extensionPath: "/assets/icons/copychildren.svg"
+    },
+    {
+        id: 52,
+        urlFilter: "*/system/themes/flexible/icons/clipboard.svg",
+        extensionPath: "/assets/icons/clipboard.svg"
+    },
+    {
+        id: 53,
+        urlFilter: "*/system/themes/flexible/icons/pasteinto.svg",
+        extensionPath: "/assets/icons/pasteinto.svg"
+    },
+    {
+        id: 54,
+        urlFilter: "*/system/themes/flexible/icons/pasteafter.svg",
+        extensionPath: "/assets/icons/pasteafter.svg"
+    },
+    {
+        id: 55,
+        urlFilter: "*/system/themes/flexible/icons/pasteinto--disabled.svg",
+        extensionPath: "/assets/icons/pasteinto-disabled.svg"
+    },
+    {
+        id: 56,
+        urlFilter: "*/system/themes/flexible/icons/pasteinto--disabled--dark.svg",
+        extensionPath: "/assets/icons/pasteinto-disabled.svg"
+    },
+    {
+        id: 57,
+        urlFilter: "*/system/themes/flexible/icons/pasteafter--disabled.svg",
+        extensionPath: "/assets/icons/pasteafter-disabled.svg"
+    },
+    {
+        id: 58,
+        urlFilter: "*/system/themes/flexible/icons/pasteafter--disabled--dark.svg",
+        extensionPath: "/assets/icons/pasteafter-disabled.svg"
+    },
+    {
+        id: 59,
+        urlFilter: "*/system/themes/flexible/icons/member.svg",
+        extensionPath: "/assets/icons/member.svg"
+    },
+    {
+        id: 60,
+        urlFilter: "*/system/themes/flexible/icons/su.svg",
+        extensionPath: "/assets/icons/su.svg"
+    },
+    {
+        id: 61,
+        urlFilter: "*/system/themes/flexible/icons/su--dark.svg",
+        extensionPath: "/assets/icons/su.svg"
+    },
+    {
+        id: 62,
+        urlFilter: "*/system/themes/flexible/icons/su--disabled.svg",
+        extensionPath: "/assets/icons/su-disabled.svg"
+    },
+    {
+        id: 63,
+        urlFilter: "*/system/themes/flexible/icons/su--disabled--dark.svg",
+        extensionPath: "/assets/icons/su-disabled.svg"
+    },
+    {
+        id: 64,
+        urlFilter: "*/system/themes/flexible/icons/delete--disabled.svg",
+        extensionPath: "/assets/icons/delete-disabled.svg"
+    },
+    {
+        id: 65,
+        urlFilter: "*/system/themes/flexible/icons/delete--disabled--dark.svg",
+        extensionPath: "/assets/icons/delete-disabled.svg"
+    },
+    {
+        id: 66,
+        urlFilter: "*/system/themes/flexible/icons/admin.svg",
+        extensionPath: "/assets/icons/admin.svg"
+    },
+    {
+        id: 67,
+        urlFilter: "*/system/themes/flexible/icons/admin--disabled.svg",
+        extensionPath: "/assets/icons/admin-disabled.svg"
     }
 ];
 

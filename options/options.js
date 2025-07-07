@@ -8,22 +8,24 @@ const saveOptions = () => {
   const elementInfoAutoClose = document.getElementById('element-info-auto-close').checked;
   const autoPublished = document.getElementById('auto-published').checked;
   const betterStyling = document.getElementById('better-styling').checked;
+  const newSorting = document.getElementById('new-sorting').checked;
   const ci = document.getElementById('ci-enabled').checked;
   const searchMode = document.getElementById('search-mode').value;
   const searchAutoFocus = document.getElementById('search-auto-focus').checked;
   chrome.storage.sync.set(
     {
-      displayIds: displayIds,
-      contextMenu: contextMenu,
-      tinyInfo: tinyInfo,
-      shortcuts: shortcuts,
-      elementInfo: elementInfo,
-      elementInfoAutoClose: elementInfoAutoClose,
-      autoPublished: autoPublished,
-      betterStyling: betterStyling,
-      ci: ci,
-      searchMode: searchMode,
-      searchAutoFocus: searchAutoFocus,
+      displayIds,
+      contextMenu,
+      tinyInfo,
+      shortcuts,
+      elementInfo,
+      elementInfoAutoClose,
+      autoPublished,
+      betterStyling,
+      newSorting,
+      ci,
+      searchMode,
+      searchAutoFocus,
     },
 
     () => {
@@ -50,6 +52,7 @@ const restoreOptions = () => {
       elementInfoAutoClose: true,
       autoPublished: true,
       betterStyling: true,
+      newSorting: true,
       ci: true,
       searchMode: 'highlight',
       searchAutoFocus: true,
@@ -63,6 +66,7 @@ const restoreOptions = () => {
       document.getElementById('element-info-auto-close').checked = items.elementInfoAutoClose;
       document.getElementById('auto-published').checked = items.autoPublished;
       document.getElementById('better-styling').checked = items.betterStyling;
+      document.getElementById('new-sorting').checked = items.newSorting;
       document.getElementById('ci-enabled').checked = items.ci;
       document.getElementById('search-mode').value = items.searchMode;
       document.getElementById('search-auto-focus').checked = items.searchAutoFocus;

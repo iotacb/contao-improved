@@ -566,4 +566,24 @@ window.addEventListener("load", async function () {
 		style.href = chrome.runtime.getURL("./assets/style_be.css");
 		document.head.appendChild(style);
 	})();
+
+	/**
+	 * New sidebar sorting
+	 */
+	(async () => {
+		const enabled = await getSetting("newSorting");
+
+		// Disable when not supported by version
+		if (!supportedByVersion("5.0.0") || !enabled) {
+			return;
+		}
+
+		const contentGroup = document.querySelector('ul#content');
+		const pageEntry = document.querySelector('ul#design > li:has(a.page)');
+		const filesEntry = document.querySelector('ul#system > li:has(a.files)');
+
+		const articleEntry = document.querySelector('ul#content > li:has(a.article)');
+		contentGroup.prepend(pageEntry);
+		articleEntry.after(filesEntry);
+	})();
 });
