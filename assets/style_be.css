@@ -40,3 +40,7 @@ fieldset.tl_box > legend > button {
   opacity: unset !important;
   pointer-events: unset !important;
 }
+
+.tl_file:has(input[type=checkbox]:checked), .tl_file:has(input[type=checkbox]:checked) .inside, .tl_folder:has(input[type=checkbox]:checked), .tl_folder:has(input[type=checkbox]:checked) .inside, .tl_content:has(input[type=checkbox]:checked), .tl_content:has(input[type=checkbox]:checked) .inside {
+  background-color: var(--hover-row, #fffce1);
+}

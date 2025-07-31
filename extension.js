@@ -149,7 +149,7 @@ window.addEventListener("load", async function () {
 			return;
 		}
 
-		const entries = this.document.querySelectorAll(
+		const entries = document.querySelectorAll(
 			".tl_file, .tl_content, .tl_folder, tr"
 		);
 
@@ -297,10 +297,10 @@ window.addEventListener("load", async function () {
 	})();
 
 	/**
-	 * Handle extra tiny infos
+	 * Handle extra tiny features
 	 */
 	(async () => {
-		const enabled = await getSetting("tinyInfo");
+		const enabled = await getSetting("tinyFeatures");
 		if (!enabled) {
 			return;
 		}
@@ -326,9 +326,20 @@ window.addEventListener("load", async function () {
 
 				const charInfo = document.createElement("span");
 				const wordInfo = document.createElement("span");
+				const loremBtn = document.createElement("button");
+				loremBtn.innerHTML = 'Add lorem';
+				loremBtn.classList.add('tiny_btn');
+
+
+				loremBtn.addEventListener('click', (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					lorem();
+				});
 
 				infoContainer.appendChild(charInfo);
 				infoContainer.appendChild(wordInfo);
+				infoContainer.appendChild(loremBtn);
 
 				menuBar.appendChild(infoContainer);
 
@@ -341,6 +352,11 @@ window.addEventListener("load", async function () {
 						text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length;
 					wordInfo.innerHTML = `Wörter: ${words}`;
 				};
+
+				const lorem = () => {
+					textArea.innerHTML = textArea.innerHTML.trim() + '<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.</p>'
+					updateInfo();
+				}
 
 				// Initial update
 				updateInfo();
@@ -408,7 +424,6 @@ window.addEventListener("load", async function () {
 
 		// Function to add copy functionality to table rows
 		const addCopyFunctionality = (document, modal = null) => {
-			console.log(document.querySelectorAll('*'));
 			const rows = document.querySelectorAll(
 				"body table tr td:not(:has(span), .tl_label)"
 			);
@@ -471,7 +486,6 @@ window.addEventListener("load", async function () {
 
 		// Also handle modal context
 		let modalHandled = false;
-		let currentModal = null;
 
 		// check when element with id "simple-modal-overlay" is created or deleted
 		const observer = new MutationObserver((mutations) => {
@@ -516,7 +530,7 @@ window.addEventListener("load", async function () {
 		if (!enabled) {
 			return;
 		}
-		
+
 		// get all mandatory fields
 		const mandatoryFields = document.querySelectorAll(
 			".mandatory:is(input, textarea, select)"
@@ -585,5 +599,20 @@ window.addEventListener("load", async function () {
 		const articleEntry = document.querySelector('ul#content > li:has(a.article)');
 		contentGroup.prepend(pageEntry);
 		articleEntry.after(filesEntry);
+	})();
+
+	(async () => {
+		const enabled = await getSetting("stickySidebar");
+
+		if (!enabled) {
+			return;
+		}
+
+		const sidebar = document.querySelector('ul.menu_level_0');
+
+		if (!sidebar) return;
+
+		sidebar.style.position = 'sticky';
+		sidebar.style.top = '0px';
 	})();
 });

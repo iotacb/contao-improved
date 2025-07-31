@@ -2,7 +2,7 @@
 fieldset.tl_box {
     > legend {
         width: 100%;
-        
+
         > button {
             width: 100%;
         }
@@ -50,6 +50,16 @@ fieldset.tl_box {
         .tl_submit_panel > button:last-child {
             opacity: unset !important;
             pointer-events: unset !important;
+        }
+    }
+}
+
+// Highlight selcted items when using 'edit multiple'
+.tl_file, .tl_folder, .tl_content {
+    &:has(input[type="checkbox"]:checked) {
+
+        &, .inside {
+            background-color: var(--hover-row, #fffce1);
         }
     }
 }

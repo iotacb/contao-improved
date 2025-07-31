@@ -6,20 +6,20 @@
 
 ## ✨ Features
 
-- **Context Menu:**  
+- **Context Menu:**
   Quickly access actions by right-clicking on element entries.
 
-- **Search Bar in Edit Multiple Screen:**  
+- **Search Bar in Edit Multiple Screen:**
   Easily find and filter settings when editing multiple elements.
 
-- **Highlight Selected Elements:**  
+- **Highlight Selected Elements:**
   Visually highlight elements when selecting multiple entries.
 
-- **Display Element IDs:**  
+- **Display Element IDs:**
   Instantly see the IDs of elements in the backend.
 
-- **Tiny Editor Info:**  
-  Display information about the content of the tiny editor.
+- **Tiny Editor Features:**
+  Add additonal features to the tiny editor.
 
 - **Extra Shortcuts:**
   New useful shortcuts
@@ -33,6 +33,12 @@
 - **Styling Improvements:**
   Enhances the visual appearance and usability of the Contao backend.
 
+- **New Sidebar sorting:**
+  Sort the sidebar in Contao 4 versions like Contao 5 Versions
+
+- **Sticky Sidebar:**
+  Makes the sidebar sticky
+
 ---
 
 ## 🛠️ Feature Details
@@ -42,8 +48,8 @@
 
 Adds a custom context menu when right-clicking on an element entry, providing quick access to useful actions.
 
-**Options:**  
-- Enabled  
+**Options:**
+- Enabled
 - Disabled
 
 ---
@@ -53,9 +59,9 @@ Adds a custom context menu when right-clicking on an element entry, providing qu
 
 Introduces a search bar on the "edit multiple" screen to help you quickly locate settings for any element.
 
-**Options:**  
-- **Highlight:** Highlights matching settings as you type.  
-- **Filter:** Only displays settings that match your search.  
+**Options:**
+- **Highlight:** Highlights matching settings as you type.
+- **Filter:** Only displays settings that match your search.
 - **Disabled:** Hides the search bar.
 - **Auto Focus:** Automatically focuses the search bar when entering the "edit multiple" page.
 
@@ -68,13 +74,13 @@ Highlight selected elements when editing multiple elements
 
 ---
 
-### Tiny Editor Info
-![Tiny Editor Info](./images/features/tinyinfo.gif)
+### Tiny Editor Features
+![Tiny Editor Features](./images/features/tinyfeatures.gif)
 
-Display information about the content of the tiny editor.
+Add additonal features to the tiny editor.
 
-**Options:**  
-- Enabled  
+**Options:**
+- Enabled
 - Disabled
 
 ### Display IDs
@@ -82,8 +88,8 @@ Display information about the content of the tiny editor.
 
 Shows the ID of each element directly in the backend interface for easier reference.
 
-**Options:**  
-- Enabled  
+**Options:**
+- Enabled
 - Disabled
 
 ### Shortcuts
@@ -95,8 +101,8 @@ New added shortcuts:
 Tiny Editor:
 - `CTRL` **+** `SHIFT` **+** `L`: Add new link
 
-**Options:**  
-- Enabled  
+**Options:**
+- Enabled
 - Disabled
 
 ### Element Info improvements
@@ -124,7 +130,21 @@ When creating new pages or articles, set them to published automatically.
 
 Improves the visual appearance and also the usability of the Contao backend.
 
-<!-- ![Styling improvements](./images/features/styling_improvements.gif) -->
+**Options:**
+- Enabled
+- Disabled
+
+### New Sidebar sorting
+
+Sort the sidebar in Contao 4 versions like Contao 5 Versions
+
+**Options:**
+- Enabled
+- Disabled
+
+### Sticky sidebar
+
+Makes the sidebar sticky
 
 **Options:**
 - Enabled
@@ -142,7 +162,7 @@ Improves the visual appearance and also the usability of the Contao backend.
 
 ## 💡 Feedback & Contributions
 
-Suggestions, bug reports, and contributions are welcome!  
+Suggestions, bug reports, and contributions are welcome!
 Feel free to open an issue or submit a pull request.
 
 ---
