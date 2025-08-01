@@ -156,9 +156,9 @@ window.addEventListener("load", async function () {
 		let idElements = [];
 
 		entries.forEach((entry) => {
-			const idRegex = /ID\s\d+/g.exec(entry.innerHTML);
+			const idRegex = /(?:ID\s|ids_)(\d+)/g.exec(entry.innerHTML);
 			if (idRegex == null) return;
-			const id = idRegex[0]; // Search the id inside the html
+			const id = `ID ${idRegex[1]}`; // Always format as "ID <num>"
 
 			const right = entry.querySelectorAll(
 				".tl_right, .tl_content_right, .tl_right_nowrap"
@@ -327,11 +327,10 @@ window.addEventListener("load", async function () {
 				const charInfo = document.createElement("span");
 				const wordInfo = document.createElement("span");
 				const loremBtn = document.createElement("button");
-				loremBtn.innerHTML = 'Add lorem';
-				loremBtn.classList.add('tiny_btn');
+				loremBtn.innerHTML = "Add lorem";
+				loremBtn.classList.add("tiny_btn");
 
-
-				loremBtn.addEventListener('click', (e) => {
+				loremBtn.addEventListener("click", (e) => {
 					e.preventDefault();
 					e.stopPropagation();
 					lorem();
@@ -354,9 +353,11 @@ window.addEventListener("load", async function () {
 				};
 
 				const lorem = () => {
-					textArea.innerHTML = textArea.innerHTML.trim() + '<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.</p>'
+					textArea.innerHTML =
+						textArea.innerHTML.trim() +
+						"<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.</p>";
 					updateInfo();
-				}
+				};
 
 				// Initial update
 				updateInfo();
@@ -460,7 +461,6 @@ window.addEventListener("load", async function () {
 							}
 						}
 					} catch (err) {
-						console.error("Failed to copy text:", err);
 					}
 
 					// Auto-close modal if we have a modal reference
@@ -553,12 +553,14 @@ window.addEventListener("load", async function () {
 			return;
 		}
 
-		const publishedContainer = document.querySelector('#ctrl_published');
+		const publishedContainer = document.querySelector("#ctrl_published");
 		if (!publishedContainer) {
 			return;
 		}
 
-		const publishedCheckbox = publishedContainer.querySelector('input[type="checkbox"]');
+		const publishedCheckbox = publishedContainer.querySelector(
+			'input[type="checkbox"]'
+		);
 		if (!publishedCheckbox) {
 			return;
 		}
@@ -592,15 +594,20 @@ window.addEventListener("load", async function () {
 			return;
 		}
 
-		const contentGroup = document.querySelector('ul#content');
-		const pageEntry = document.querySelector('ul#design > li:has(a.page)');
-		const filesEntry = document.querySelector('ul#system > li:has(a.files)');
+		const contentGroup = document.querySelector("ul#content");
+		const pageEntry = document.querySelector("ul#design > li:has(a.page)");
+		const filesEntry = document.querySelector("ul#system > li:has(a.files)");
 
-		const articleEntry = document.querySelector('ul#content > li:has(a.article)');
+		const articleEntry = document.querySelector(
+			"ul#content > li:has(a.article)"
+		);
 		contentGroup.prepend(pageEntry);
 		articleEntry.after(filesEntry);
 	})();
 
+	/**
+	 * Sticky sidebar
+	 */
 	(async () => {
 		const enabled = await getSetting("stickySidebar");
 
@@ -608,11 +615,253 @@ window.addEventListener("load", async function () {
 			return;
 		}
 
-		const sidebar = document.querySelector('ul.menu_level_0');
+		const sidebar = document.querySelector("ul.menu_level_0");
 
 		if (!sidebar) return;
 
-		sidebar.style.position = 'sticky';
-		sidebar.style.top = '0px';
+		sidebar.style.position = "sticky";
+		sidebar.style.top = "0px";
+	})();
+
+	/**
+	 * Sticky toolbar
+	 */
+	(async () => {
+		const enabled = await getSetting("stickyToolbar");
+
+		if (!enabled) {
+			return;
+		}
+
+		const toolbar = document.querySelector("#tl_buttons");
+
+		if (!toolbar) return;
+
+		toolbar.style.position = "sticky";
+		toolbar.style.top = "0px";
+		toolbar.style.zIndex = "1000";
+		toolbar.style.backgroundColor = "var(--content-bg)";
+	})();
+
+	(async () => {
+		const getFormElement = (widget) => {
+			const select = widget.querySelector("select");
+			if (select) return select;
+
+			const inputs = widget.querySelectorAll("input:not([type='hidden'])");
+			for (const input of inputs) {
+				if (
+					input.style.width === "100%" &&
+					input.getAttribute("tabindex") === "-1"
+				) {
+					continue;
+				}
+				return input;
+			}
+
+			const textarea = widget.querySelector("textarea");
+			if (textarea) return textarea;
+
+			return widget.querySelector("input[type='hidden']");
+		};
+
+		const setChosenValue = (select, value) => {
+
+			select.value = value;
+
+			const chosenContainer = document.getElementById(select.id + "_chzn");
+			if (!chosenContainer) {
+				return false;
+			}
+
+			const chosenSpan = chosenContainer.querySelector(".chzn-single span");
+			if (chosenSpan && select.selectedIndex >= 0) {
+				const selectedOption = select.options[select.selectedIndex];
+				chosenSpan.textContent = selectedOption.text;
+			}
+
+			select.dispatchEvent(new Event("change", { bubbles: true }));
+
+			return true;
+		};
+
+		const setValue = (element, value, isChecked = null) => {
+
+			if (element.type === "checkbox" || element.type === "radio") {
+				element.checked = isChecked !== null ? isChecked : value;
+				element.dispatchEvent(new Event("change", { bubbles: true }));
+			} else if (element.tagName.toLowerCase() === "select") {
+				const chosenContainer = document.getElementById(element.id + "_chzn");
+				if (chosenContainer) {
+					setChosenValue(element, value);
+				} else {
+					element.value = value;
+					element.dispatchEvent(new Event("change", { bubbles: true }));
+				}
+			} else if (element.type === "hidden") {
+				const widget = element.closest(".widget");
+				const associatedCheckbox = widget
+					? widget.querySelector('input[type="checkbox"]')
+					: null;
+
+				if (associatedCheckbox) {
+					associatedCheckbox.checked =
+						value === "1" || value === "true" || value === true;
+					associatedCheckbox.dispatchEvent(
+						new Event("change", { bubbles: true })
+					);
+				}
+
+				element.value = value;
+			} else {
+				element.value = value;
+			}
+		};
+
+		const getValue = (element) => {
+			let value;
+			if (element.type === "checkbox" || element.type === "radio") {
+				value = element.checked;
+			} else if (element.tagName.toLowerCase() === "select") {
+				value = element.value;
+			} else if (element.type === "hidden") {
+				const widget = element.closest(".widget");
+				const associatedCheckbox = widget
+					? widget.querySelector('input[type="checkbox"]')
+					: null;
+
+				if (associatedCheckbox) {
+					value = associatedCheckbox.checked;
+				} else {
+					value = element.value;
+				}
+			} else {
+				value = element.value;
+			}
+			return value;
+		};
+
+		const applyAll = (widgets, value, originElement) => {
+			const originName = originElement.name;
+			const originType =
+				originElement.type || originElement.tagName.toLowerCase();
+			const originClass = originElement.className;
+
+			widgets.forEach((widget) => {
+				const element = getFormElement(widget);
+				if (element && element !== originElement) {
+					const elementType = element.type || element.tagName.toLowerCase();
+					const matches =
+						element.name === originName ||
+						(elementType === originType && element.className === originClass);
+
+					if (matches) {
+						if (
+							originElement.type === "checkbox" ||
+							originElement.type === "radio" ||
+							(originElement.type === "hidden" &&
+								(value === true || value === false))
+						) {
+							setValue(element, null, value);
+						} else {
+							setValue(element, value);
+						}
+					}
+				}
+			});
+		};
+
+		let editAllStates = new Map();
+		let elementListeners = new Map();
+
+		if (window.location.search.includes("act=editAll")) {
+			const widgets = document.querySelectorAll(".widget");
+
+			widgets.forEach((widget, index) => {
+				let label = widget.querySelector("label");
+				if (!label) return;
+
+				const formElement = getFormElement(widget);
+				if (!formElement) return;
+
+				const button = document.createElement("p");
+				button.innerHTML = "Edit all";
+				button.classList.add("tl_submit");
+				button.style.display = "inline-block";
+				button.style.margin = "unset";
+				button.style.padding = "unset";
+
+				button.addEventListener("click", (e) => {
+					e.preventDefault();
+					e.stopPropagation();
+
+					const elementType =
+						formElement.type || formElement.tagName.toLowerCase();
+					const elementKey =
+						formElement.name || `${elementType}-${formElement.className}`;
+
+					const isCurrentlyEditing = editAllStates.get(elementKey) || false;
+					editAllStates.set(elementKey, !isCurrentlyEditing);
+
+					if (!isCurrentlyEditing) {
+						button.innerHTML = "Stop edit";
+
+						const currentValue = getValue(formElement);
+						applyAll(widgets, currentValue, formElement);
+
+						const listener = (e) => {
+							const newValue = getValue(formElement);
+							applyAll(widgets, newValue, formElement);
+						};
+
+						elementListeners.set(formElement, listener);
+
+						const eventType =
+							formElement.tagName.toLowerCase() === "select" ||
+							formElement.type === "checkbox" ||
+							formElement.type === "radio"
+								? "change"
+								: "input";
+
+						formElement.addEventListener(eventType, listener);
+
+						if (formElement.type === "hidden") {
+							const associatedCheckbox = widget.querySelector(
+								'input[type="checkbox"]'
+							);
+							if (associatedCheckbox) {
+								associatedCheckbox.addEventListener("change", listener);
+							}
+						}
+					} else {
+						button.innerHTML = "Edit all";
+
+						const listener = elementListeners.get(formElement);
+						if (listener) {
+							const eventType =
+								formElement.tagName.toLowerCase() === "select" ||
+								formElement.type === "checkbox" ||
+								formElement.type === "radio"
+									? "change"
+									: "input";
+							formElement.removeEventListener(eventType, listener);
+
+							if (formElement.type === "hidden") {
+								const associatedCheckbox = widget.querySelector(
+									'input[type="checkbox"]'
+								);
+								if (associatedCheckbox) {
+									associatedCheckbox.removeEventListener("change", listener);
+								}
+							}
+
+							elementListeners.delete(formElement);
+						}
+					}
+				});
+
+				label.after(button);
+			});
+		}
 	})();
 });

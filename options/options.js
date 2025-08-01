@@ -10,6 +10,7 @@ const saveOptions = () => {
   const betterStyling = document.getElementById('better-styling').checked;
   const newSorting = document.getElementById('new-sorting').checked;
   const stickySidebar = document.getElementById('sticky-sidebar').checked;
+  const stickyToolbar = document.getElementById('sticky-toolbar').checked;
   const ci = document.getElementById('ci-enabled').checked;
   const searchMode = document.getElementById('search-mode').value;
   const searchAutoFocus = document.getElementById('search-auto-focus').checked;
@@ -25,6 +26,7 @@ const saveOptions = () => {
       betterStyling,
       newSorting,
       stickySidebar,
+      stickyToolbar,
       ci,
       searchMode,
       searchAutoFocus,
@@ -56,6 +58,7 @@ const restoreOptions = () => {
       betterStyling: true,
       newSorting: true,
       stickySidebar: true,
+      stickyToolbar: true,
       ci: true,
       searchMode: 'highlight',
       searchAutoFocus: true,
@@ -71,6 +74,7 @@ const restoreOptions = () => {
       document.getElementById('better-styling').checked = items.betterStyling;
       document.getElementById('new-sorting').checked = items.newSorting;
       document.getElementById('sticky-sidebar').checked = items.stickySidebar;
+      document.getElementById('sticky-toolbar').checked = items.stickyToolbar;
       document.getElementById('ci-enabled').checked = items.ci;
       document.getElementById('search-mode').value = items.searchMode;
       document.getElementById('search-auto-focus').checked = items.searchAutoFocus;
