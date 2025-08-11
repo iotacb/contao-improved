@@ -526,6 +526,10 @@ window.addEventListener("load", async function () {
 	 * Auto published pages and articles
 	 */
 	(async () => {
+
+		//!: when cloning a page or article, the script does not work
+		//!: because the script checks for the mandatory fields and when cloning, the fields are not empty
+
 		const enabled = await getSetting("autoPublished");
 		if (!enabled) {
 			return;
@@ -639,15 +643,28 @@ window.addEventListener("load", async function () {
 
 		toolbar.style.position = "sticky";
 		toolbar.style.top = "0px";
-		toolbar.style.zIndex = "1000";
+		toolbar.style.zIndex = "1";
 		toolbar.style.backgroundColor = "var(--content-bg)";
+		toolbar.style.borderBottom = "1px solid var(--content-border)";
 	})();
 
+	/**
+	 * Multi Edit
+	 */
 	(async () => {
-		const getFormElement = (widget) => {
-			const select = widget.querySelector("select");
-			if (select) return select;
+		const enabled = await getSetting("multiEdit");
+		if (!enabled) {
+			return;
+		}
 
+		const getFormElements = (widget) => {
+			const elements = [];
+			
+			// Get all select elements
+			const selects = widget.querySelectorAll("select");
+			elements.push(...selects);
+
+			// Get all visible inputs (excluding hidden and certain styled ones)
 			const inputs = widget.querySelectorAll("input:not([type='hidden'])");
 			for (const input of inputs) {
 				if (
@@ -656,13 +673,20 @@ window.addEventListener("load", async function () {
 				) {
 					continue;
 				}
-				return input;
+				elements.push(input);
 			}
 
-			const textarea = widget.querySelector("textarea");
-			if (textarea) return textarea;
+			// Get all textareas
+			const textareas = widget.querySelectorAll("textarea");
+			elements.push(...textareas);
 
-			return widget.querySelector("input[type='hidden']");
+			// If no visible elements found, get hidden inputs
+			if (elements.length === 0) {
+				const hiddenInputs = widget.querySelectorAll("input[type='hidden']");
+				elements.push(...hiddenInputs);
+			}
+
+			return elements;
 		};
 
 		const setChosenValue = (select, value) => {
@@ -747,27 +771,35 @@ window.addEventListener("load", async function () {
 				originElement.type || originElement.tagName.toLowerCase();
 			const originClass = originElement.className;
 
-			widgets.forEach((widget) => {
-				const element = getFormElement(widget);
-				if (element && element !== originElement) {
-					const elementType = element.type || element.tagName.toLowerCase();
-					const matches =
-						element.name === originName ||
-						(elementType === originType && element.className === originClass);
+			// Find the index/position of the origin element within its widget
+			const originWidget = originElement.closest('.widget');
+			const originElements = getFormElements(originWidget);
+			const originIndex = originElements.indexOf(originElement);
 
-					if (matches) {
-						if (
-							originElement.type === "checkbox" ||
-							originElement.type === "radio" ||
-							(originElement.type === "hidden" &&
-								(value === true || value === false))
-						) {
-							setValue(element, null, value);
-						} else {
-							setValue(element, value);
+			widgets.forEach((widget) => {
+				const elements = getFormElements(widget);
+				
+				elements.forEach((element, elementIndex) => {
+					if (element && element !== originElement) {
+						const elementType = element.type || element.tagName.toLowerCase();
+						
+						// Only match by exact position within widget
+						const matchesByPosition = elementIndex === originIndex;
+
+						if (matchesByPosition) {
+							if (
+								originElement.type === "checkbox" ||
+								originElement.type === "radio" ||
+								(originElement.type === "hidden" &&
+									(value === true || value === false))
+							) {
+								setValue(element, null, value);
+							} else {
+								setValue(element, value);
+							}
 						}
 					}
-				}
+				});
 			});
 		};
 
@@ -775,14 +807,18 @@ window.addEventListener("load", async function () {
 		let elementListeners = new Map();
 
 		if (window.location.search.includes("act=editAll")) {
+			const fieldFormContainer = document.querySelector(".tl_formbody_edit.nogrid");
+			if (!fieldFormContainer) return;
 			const widgets = document.querySelectorAll(".widget");
 
 			widgets.forEach((widget, index) => {
 				let label = widget.querySelector("label");
 				if (!label) return;
 
-				const formElement = getFormElement(widget);
-				if (!formElement) return;
+				const formElements = getFormElements(widget);
+				if (formElements.length === 0) return;
+
+				const widgetKey = `widget-${index}`;
 
 				const button = document.createElement("p");
 				button.innerHTML = "Edit all";
@@ -795,67 +831,65 @@ window.addEventListener("load", async function () {
 					e.preventDefault();
 					e.stopPropagation();
 
-					const elementType =
-						formElement.type || formElement.tagName.toLowerCase();
-					const elementKey =
-						formElement.name || `${elementType}-${formElement.className}`;
-
-					const isCurrentlyEditing = editAllStates.get(elementKey) || false;
-					editAllStates.set(elementKey, !isCurrentlyEditing);
+					const isCurrentlyEditing = editAllStates.get(widgetKey) || false;
+					editAllStates.set(widgetKey, !isCurrentlyEditing);
 
 					if (!isCurrentlyEditing) {
 						button.innerHTML = "Stop edit";
+						button.style.backgroundColor = "#f47c00";
+						button.style.color = "white";
 
-						const currentValue = getValue(formElement);
-						applyAll(widgets, currentValue, formElement);
+						// Set up listeners for all form elements in this widget
+						const listeners = [];
+						
+						formElements.forEach((formElement) => {
+							// Create individual listener for this specific element
+							const listener = (e) => {
+								const newValue = getValue(formElement);
+								applyAll(widgets, newValue, formElement);
+							};
 
-						const listener = (e) => {
-							const newValue = getValue(formElement);
-							applyAll(widgets, newValue, formElement);
-						};
+							listeners.push({ element: formElement, listener: listener });
 
-						elementListeners.set(formElement, listener);
-
-						const eventType =
-							formElement.tagName.toLowerCase() === "select" ||
-							formElement.type === "checkbox" ||
-							formElement.type === "radio"
-								? "change"
-								: "input";
-
-						formElement.addEventListener(eventType, listener);
-
-						if (formElement.type === "hidden") {
-							const associatedCheckbox = widget.querySelector(
-								'input[type="checkbox"]'
-							);
-							if (associatedCheckbox) {
-								associatedCheckbox.addEventListener("change", listener);
-							}
-						}
-					} else {
-						button.innerHTML = "Edit all";
-
-						const listener = elementListeners.get(formElement);
-						if (listener) {
 							const eventType =
 								formElement.tagName.toLowerCase() === "select" ||
 								formElement.type === "checkbox" ||
 								formElement.type === "radio"
 									? "change"
 									: "input";
-							formElement.removeEventListener(eventType, listener);
+
+							formElement.addEventListener(eventType, listener);
 
 							if (formElement.type === "hidden") {
 								const associatedCheckbox = widget.querySelector(
 									'input[type="checkbox"]'
 								);
 								if (associatedCheckbox) {
-									associatedCheckbox.removeEventListener("change", listener);
+									associatedCheckbox.addEventListener("change", listener);
+									listeners.push({ element: associatedCheckbox, listener: listener });
 								}
 							}
+						});
 
-							elementListeners.delete(formElement);
+						elementListeners.set(widgetKey, listeners);
+					} else {
+						button.innerHTML = "Edit all";
+						button.style.backgroundColor = "";
+						button.style.color = "";
+
+						const listeners = elementListeners.get(widgetKey);
+						if (listeners) {
+							listeners.forEach(({ element, listener }) => {
+								const eventType =
+									element.tagName.toLowerCase() === "select" ||
+									element.type === "checkbox" ||
+									element.type === "radio"
+										? "change"
+										: "input";
+								element.removeEventListener(eventType, listener);
+							});
+
+							elementListeners.delete(widgetKey);
 						}
 					}
 				});

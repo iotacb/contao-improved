@@ -11,6 +11,7 @@ const saveOptions = () => {
   const newSorting = document.getElementById('new-sorting').checked;
   const stickySidebar = document.getElementById('sticky-sidebar').checked;
   const stickyToolbar = document.getElementById('sticky-toolbar').checked;
+  const multiEdit = document.getElementById('multi-edit').checked;
   const ci = document.getElementById('ci-enabled').checked;
   const searchMode = document.getElementById('search-mode').value;
   const searchAutoFocus = document.getElementById('search-auto-focus').checked;
@@ -27,6 +28,7 @@ const saveOptions = () => {
       newSorting,
       stickySidebar,
       stickyToolbar,
+      multiEdit,
       ci,
       searchMode,
       searchAutoFocus,
@@ -59,6 +61,7 @@ const restoreOptions = () => {
       newSorting: true,
       stickySidebar: true,
       stickyToolbar: true,
+      multiEdit: true,
       ci: true,
       searchMode: 'highlight',
       searchAutoFocus: true,
@@ -75,6 +78,7 @@ const restoreOptions = () => {
       document.getElementById('new-sorting').checked = items.newSorting;
       document.getElementById('sticky-sidebar').checked = items.stickySidebar;
       document.getElementById('sticky-toolbar').checked = items.stickyToolbar;
+      document.getElementById('multi-edit').checked = items.multiEdit;
       document.getElementById('ci-enabled').checked = items.ci;
       document.getElementById('search-mode').value = items.searchMode;
       document.getElementById('search-auto-focus').checked = items.searchAutoFocus;
