@@ -98,6 +98,10 @@ window.addEventListener("load", async function () {
 				e.preventDefault();
 				e.stopPropagation();
 
+				if (contextMenu.classList.contains('open')) {
+					contextMenu.style.transition = 'left .2s, top .2s';
+				}
+
 				contextMenu.classList.add("open");
 				// TODO: Make sure the context element has space on the screen (eg. display it on the left or top when there is no space)
 				const posX = e.clientX - window.scrollX;
@@ -112,6 +116,7 @@ window.addEventListener("load", async function () {
 				if (actions.length === 0) {
 					contextMenu.classList.remove("open");
 					contextMenu.innerHTML = "";
+					contextMenu.style.transition = '';
 				}
 				actions.forEach((action) => {
 					const actionClone = action.cloneNode(true);
@@ -130,6 +135,7 @@ window.addEventListener("load", async function () {
 		window.addEventListener("click", (e) => {
 			if (contextMenu.classList.contains("open")) {
 				contextMenu.classList.remove("open");
+				contextMenu.style.transition = '';
 
 				const removeContent = () => {
 					contextMenu.innerHTML = "";
@@ -375,6 +381,94 @@ window.addEventListener("load", async function () {
 				iframe.dispatchEvent(event);
 			}
 		});
+
+		const formatClipboardToTel = (rawText) => {
+			if (!rawText) return null;
+			let text = String(rawText).trim();
+			// Already a tel: URL
+			const telMatch = text.match(/tel:\s*([^\s]+)/i);
+			if (telMatch && telMatch[1]) {
+				let num = telMatch[1].replace(/[^\d+]/g, "");
+				if (num.startsWith("00")) num = "+" + num.slice(2);
+				return num ? `tel:${num}` : null;
+			}
+
+			// Extract digits and +
+			let digits = text.replace(/[^\d+]/g, "");
+			if (!digits) return null;
+
+			// Convert 00 prefix to +
+			if (digits.startsWith("00")) {
+				digits = "+" + digits.slice(2);
+			}
+
+			// German leading 0 => +49 drop 0
+			if (digits.startsWith("0")) {
+				digits = "+49" + digits.slice(1);
+			} else if (/^49\d{6,}$/.test(digits)) {
+				// German without +
+				digits = "+" + digits;
+			} else if (/^\d{6,}$/.test(digits) && !digits.startsWith("+")) {
+				// Generic international without +
+				digits = "+" + digits;
+			}
+
+			if (!/^\+\d{6,}$/.test(digits)) {
+				return null;
+			}
+
+			return `tel:${digits}`;
+		};
+
+		const addPhoneButtonToToxDialog = (dialog) => {
+			if (!dialog || !(dialog instanceof HTMLElement)) return;
+			if (dialog.querySelector(".ci-phone-button")) return;
+			const footer = dialog.querySelector(".tox-dialog__footer");
+			if (!footer) return;
+
+			const footerEnd = footer.querySelector(".tox-dialog__footer-end") || footer;
+
+			const btn = document.createElement("button");
+			btn.type = "button";
+			btn.className = "tox-button ci-phone-button";
+			btn.textContent = "Phone";
+			btn.addEventListener("click", async (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+
+				const urlInput = dialog.querySelector('input.tox-textfield[type="url"], input.tox-textfield[type=url]');
+				if (!urlInput) return;
+
+				let clip = "";
+				try {
+					if (navigator.clipboard && navigator.clipboard.readText) {
+						clip = await navigator.clipboard.readText();
+					}
+				} catch (err) {
+					clip = "";
+				}
+
+				let formatted = formatClipboardToTel(clip);
+				if (!formatted) {
+					formatted = "tel:";
+				}
+
+				urlInput.value = formatted;
+				urlInput.dispatchEvent(new Event("input", { bubbles: true }));
+				urlInput.dispatchEvent(new Event("change", { bubbles: true }));
+				urlInput.focus();
+			});
+
+			footerEnd.appendChild(btn);
+		};
+
+		const toxObserver = new MutationObserver(() => {
+			document.querySelectorAll(".tox-dialog").forEach(addPhoneButtonToToxDialog);
+		});
+		toxObserver.observe(document.body, { childList: true, subtree: true });
+
+		// Handle already open dialogs
+		document.querySelectorAll(".tox-dialog").forEach(addPhoneButtonToToxDialog);
 	})();
 
 	/**
@@ -659,7 +753,7 @@ window.addEventListener("load", async function () {
 
 		const getFormElements = (widget) => {
 			const elements = [];
-			
+
 			// Get all select elements
 			const selects = widget.querySelectorAll("select");
 			elements.push(...selects);
@@ -778,11 +872,11 @@ window.addEventListener("load", async function () {
 
 			widgets.forEach((widget) => {
 				const elements = getFormElements(widget);
-				
+
 				elements.forEach((element, elementIndex) => {
 					if (element && element !== originElement) {
 						const elementType = element.type || element.tagName.toLowerCase();
-						
+
 						// Only match by exact position within widget
 						const matchesByPosition = elementIndex === originIndex;
 
@@ -841,7 +935,7 @@ window.addEventListener("load", async function () {
 
 						// Set up listeners for all form elements in this widget
 						const listeners = [];
-						
+
 						formElements.forEach((formElement) => {
 							// Create individual listener for this specific element
 							const listener = (e) => {
