@@ -586,5 +586,77 @@ body {
 				background-color: #4a5562 !important;
 			}
 		}
+
+		#tmenu__profile {
+			z-index: 99999999999999 !important;
+		}
+
+		.notification-wrapper {
+			position: fixed;
+			inset: 0;
+			pointer-events: none;
+			z-index: 99999999999999;
+
+			.notification {
+				position: absolute;
+				bottom: 1rem;
+				right: 1rem;
+				background-color: var(--content-bg);
+				border: 1px solid var(--contao);
+				border-radius: .5rem;
+				padding: 1rem;
+				box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+				color: var(--content-text);
+				opacity: 0;
+
+				&.slide-in {
+					animation: slide-in .5s ease-out forwards;
+				}
+
+				&.slide-out {
+					animation: slide-out .5s ease-out forwards;
+				}
+
+				&::before {
+					content: 'i';
+					position: absolute;
+					width: 2rem;
+					height: 2rem;
+					background-color: var(--contao);
+					border-radius: 50%;
+					top: 50%;
+					left: -1.5rem;
+					color: var(--content-text);
+					transform: translateY(-50%);
+					font-weight: bold;
+					font-size: 1.25rem;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+				}
+			}
+		}
+	}
+}
+
+@keyframes slide-in {
+	from {
+		transform: translateY(100px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slide-out {
+	from {
+		transform: translateY(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateY(100px);
+		opacity: 0;
 	}
 }
