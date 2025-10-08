@@ -246,6 +246,30 @@ body {
 				background: $color-bg-toggle-checked;
 				box-shadow: 0 0 6px rgba(244, 124, 0, 0.4);
 			}
+
+			&.disabled {
+				position: relative;
+				filter: saturate(0);
+				background: rgba(255, 255, 255, 0.03);
+				border: 1px solid rgba(255, 255, 255, 0.08);
+				pointer-events: none;
+
+				&::after {
+					content: "Not supported in this Contao Version";
+					display: block;
+					position: absolute;
+					inset: 0;
+					text-align: center;
+					background-color: rgba(30, 30, 30, 0.95);
+					backdrop-filter: blur(100px);
+					border-radius: inherit;
+					font-size: 150%;
+					z-index: 1;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+			}
 		}
 
 		.select-wrapper {
@@ -504,7 +528,7 @@ body {
 
 		.tl_id {
 			opacity: 0.5;
-			padding-left: 2rem;
+			padding-left: .5rem;
 			display: inline-block;
 			text-wrap: nowrap;
 		}
@@ -610,11 +634,11 @@ body {
 				opacity: 0;
 
 				&.slide-in {
-					animation: slide-in .5s ease-out forwards;
+					animation: slide-in-not .5s ease-out forwards;
 				}
 
 				&.slide-out {
-					animation: slide-out .5s ease-out forwards;
+					animation: slide-out-not .5s ease-out forwards;
 				}
 
 				&::before {
@@ -639,23 +663,23 @@ body {
 	}
 }
 
-@keyframes slide-in {
-	from {
+@keyframes slide-in-not {
+	0% {
 		transform: translateY(100px);
 		opacity: 0;
 	}
-	to {
+	100% {
 		transform: translateY(0);
 		opacity: 1;
 	}
 }
 
-@keyframes slide-out {
-	from {
+@keyframes slide-out-not {
+	0% {
 		transform: translateY(0);
 		opacity: 1;
 	}
-	to {
+	100% {
 		transform: translateY(100px);
 		opacity: 0;
 	}

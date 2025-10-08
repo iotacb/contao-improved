@@ -21,22 +21,23 @@
 			]
 		}
 	],
-	"background": {
-		"service_worker": "service-worker.js"
-	},
-	"permissions": ["storage", "declarativeNetRequest"],
+	"permissions": ["storage"],
 	"host_permissions": [
 		"https://*/contao*",
 		"https://*/contao/*",
 		"http://*/contao*",
 		"http://*/contao/*"
 	],
+	"externally_connectable": {
+		"matches": [
+			"https://*/contao*",
+			"https://*/contao/*",
+			"http://*/contao*",
+			"http://*/contao/*"
+		]
+	},
 	"options_page": "options/options.html",
 	"action": {
 		"default_popup": "options/options.html"
-	},
-	"web_accessible_resources": [{
-		"resources": ["assets/*"],
-		"matches": ["<all_urls>"]
-    }]
+	}
 }

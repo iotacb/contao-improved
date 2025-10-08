@@ -13,47 +13,6 @@ fieldset.tl_box {
     pointer-events: none;
 }
 
-// make filter buttons better
-.tl_panel:has(> .tl_submit_panel) {
-    display: flex;
-    flex-direction: row-reverse;
-
-    .tl_submit_panel {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: .25rem;
-
-        > button {
-            top: unset;
-            width: 2rem;
-            height: 32px;
-            font-size: 0;
-            background-color: var(--form-bg, #fff);
-            border: 1px solid var(--form-border, #aaa);
-            border-radius: .25rem;
-
-            &:last-child {
-                opacity: 0.5;
-                pointer-events: none;
-            }
-
-            &:hover {
-                background-color: var(--form-bg-hover, #f6f6f6);
-            }
-        }
-    }
-}
-
-.tl_formbody {
-    :has(.active) {
-        .tl_submit_panel > button:last-child {
-            opacity: unset !important;
-            pointer-events: unset !important;
-        }
-    }
-}
-
 // Highlight selcted items when using 'edit multiple'
 .tl_file, .tl_folder, .tl_content {
     &:has(input[type="checkbox"]:checked) {

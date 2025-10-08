@@ -1,3 +1,21 @@
+const getContaoVersion = () => {
+	const versionElement = document.querySelector('.version');
+	if (!versionElement) {
+		return;
+	}
+
+	const match = /Version\s+(\d+)\.(\d+)(?:\.(\d+))?/.exec(
+		versionElement.textContent
+	);
+
+	if (!match) {
+		return;
+	}
+
+	const [, maj, min, patch = '0'] = match;
+	return [parseInt(maj, 10), parseInt(min, 10), parseInt(patch, 10)];
+}
+
 /**
  * Check the version of Contao and compare them to the given max and min version
  * @param {*} maxVersion
@@ -5,242 +23,321 @@
  * @returns {boolean} true if the current version is between the given versions, false otherwise
  */
 const supportedByVersion = (maxVersion, minVersion = '0.0.0') => {
-	const getContaoVersion = () => {
-		const versionElement = document.querySelector('.version')
-		if (!versionElement) {
-			return
-		}
-
-		const match = /Version\s+(\d+)\.(\d+)(?:\.(\d+))?/.exec(
-			versionElement.textContent
-		)
-		if (!match) {
-			return
-		}
-
-		const [, maj, min, patch = '0'] = match
-		return [parseInt(maj, 10), parseInt(min, 10), parseInt(patch, 10)]
-	}
 
 	const parseVersionString = (versionStr) => {
-		const parts = versionStr.split('.').map((n) => parseInt(n, 10))
-		while (parts.length < 3) parts.push(0)
-		return parts.slice(0, 3)
+		const parts = versionStr.split('.').map((n) => parseInt(n, 10));
+		while (parts.length < 3) parts.push(0);
+		return parts.slice(0, 3);
 	}
 
 	const compareVersions = (a, b) => {
 		for (let i = 0; i < 3; i++) {
-			if (a[i] > b[i]) return 1
-			if (a[i] < b[i]) return -1
+			if (a[i] > b[i]) return 1;
+			if (a[i] < b[i]) return -1;
 		}
-		return 0
+		return 0;
 	}
 
 	try {
-		const current = getContaoVersion()
+		const current = getContaoVersion();
 		if (!current) {
-			return false
+			return false;
 		}
 
-		const minV = parseVersionString(minVersion)
-		const maxV = parseVersionString(maxVersion)
+		const minV = parseVersionString(minVersion);
+		const maxV = parseVersionString(maxVersion);
 
-		const tooLow = compareVersions(current, minV) < 0
-		const tooHigh = compareVersions(current, maxV) > 0
-		return !tooLow && !tooHigh
+		const tooLow = compareVersions(current, minV) < 0;
+		const tooHigh = compareVersions(current, maxV) > 0;
+		return !tooLow && !tooHigh;
 	} catch (e) {
-		return false
+		return false;
 	}
 }
 
+/**
+ * Check the version of Contao and compare them to the given max and min version
+ * @param {*} maxVersion
+ * @param {*} minVersion
+ * @returns {boolean} true if the current version is between the given versions, false otherwise
+ */
+const supportedByVersionMin = (minVersion = '0.0.0') => {
+
+	const parseVersionString = (versionStr) => {
+		const parts = versionStr.split('.').map((n) => parseInt(n, 10));
+		while (parts.length < 3) parts.push(0);
+		return parts.slice(0, 3);
+	};
+
+	const compareVersions = (a, b) => {
+		for (let i = 0; i < 3; i++) {
+			if (a[i] > b[i]) return 1;
+			if (a[i] < b[i]) return -1;
+		}
+		return 0;
+	};
+
+	try {
+		const current = getContaoVersion();
+		if (!current) return false;
+
+		const minV = parseVersionString(minVersion);
+		return compareVersions(current, minV) >= 0;
+	} catch {
+		return false;
+	}
+};
+
 const getSetting = async (feature) => {
-	const result = await chrome.storage.sync.get({ [feature]: true })
-	return result[feature]
+	const result = await chrome.storage.sync.get({ [feature]: true });
+	return result[feature];
 }
 
 function stripHtml(html) {
-	let tmp = document.createElement('div')
-	tmp.innerHTML = html
-	return tmp.textContent || tmp.innerText || ''
+	let tmp = document.createElement('div');
+	tmp.innerHTML = html;
+	return tmp.textContent || tmp.innerText || '';
 }
 
-window.addEventListener('load', async function () {
-	const ciEnabled = await getSetting('ci')
-	if (!ciEnabled) return
+function stripPlainText(html, { removeWhitespace = true, removeComments = true } = {}) {
+	const tmp = document.createElement('div');
+	tmp.innerHTML = html;
+
+	// SHOW_TEXT (0x4) | SHOW_COMMENT (0x80) if we want comments too
+	const whatToShow =
+		NodeFilter.SHOW_TEXT | (removeComments ? NodeFilter.SHOW_COMMENT : 0);
+
+	const walker = document.createTreeWalker(tmp, whatToShow, null);
+	const toRemove = [];
+
+	let node;
+	while ((node = walker.nextNode())) {
+		if (node.nodeType === Node.TEXT_NODE) {
+			// Remove all text, or only non-whitespace depending on option
+			if (removeWhitespace || node.nodeValue.trim().length > 0) {
+				toRemove.push(node);
+			}
+		} else if (node.nodeType === Node.COMMENT_NODE && removeComments) {
+			toRemove.push(node);
+		}
+	}
+
+	toRemove.forEach((n) => n.remove());
+	return tmp.innerHTML;
+}
+
+window.addEventListener('load', () => {
+	run();
+});
+
+// handle running extension on contao version using turbo
+window.addEventListener('turbo:load', () => {
+	run();
+});
+
+async function run() {
+	const ciEnabled = await getSetting('ci');
+	if (!ciEnabled) return;
+
+	async function publishDataFromPage() {
+  try {
+    const payload = {
+		contaoVersion: getContaoVersion()
+    };
+
+    // Write to storage
+    await chrome.storage.local.set({ contentData: payload });
+    // Optional: flag for freshness
+    await chrome.storage.local.set({ contentDataVersion: Date.now() });
+  } catch (e) {
+    console.error("Failed to write to storage:", e);
+  }
+}
+
+// Call whenever you have new data
+publishDataFromPage();
 
 	/**
 	 * Add notification module
 	 */
-	;(async () => {
-		const notifcationWrapper = document.createElement('div')
-		notifcationWrapper.className = 'notification-wrapper'
-		document.body.appendChild(notifcationWrapper)
+	; (async () => {
+		const notifcationWrapper = document.createElement('div');
+		notifcationWrapper.className = 'notification-wrapper';
+		document.body.appendChild(notifcationWrapper);
 
 		window.createNotification = function createNotification(message, type) {
-			const notification = document.createElement('div')
-			notification.className = `notification ${type}`
-			notification.innerHTML = message
-			notifcationWrapper.appendChild(notification)
-			notification.classList.add('slide-in')
+			const notification = document.createElement('div');
+			notification.className = `notification ${type}`;
+			notification.innerHTML = message;
+			notifcationWrapper.appendChild(notification);
+			notification.classList.add('slide-in');
 
 			setTimeout(() => {
-				notification.classList.add('slide-out')
+				notification.classList.add('slide-out');
 				setTimeout(() => {
-					notification.remove()
-				}, 500)
-			}, 5000)
+					notification.remove();
+				}, 500);
+			}, 5000);
 		}
-	})()
+	})();
 
 	/**
 	 * Handle context menu
 	 */
-	;(async () => {
-		const enabled = await getSetting('contextMenu')
+	(async () => {
+		const enabled = await getSetting('contextMenu');
+
 		// Disable when not supported by version
 		if (!supportedByVersion('5.5') || !enabled) {
-			return
+			return;
 		}
 
 		// TODO: Currently only works on lists that are displayed in an 'ul' element. Some pages use a 'table' element instead. Also support this.
 		const entries = this.document.querySelectorAll(
 			'.tl_file, .tl_content, .tl_folder, tr'
-		)
+		);
 
 		// Create context menu element
-		const contextMenu = document.createElement('div')
-		contextMenu.className = 'context-menu'
-		contextMenu.id = 'context-menu'
+		const contextMenu = document.createElement('div');
+		contextMenu.className = 'context-menu';
+		contextMenu.id = 'context-menu';
 
 		// Add the context menu to the body
-		document.body.appendChild(contextMenu)
+		document.body.appendChild(contextMenu);
 
-		if (entries.length === 0 || !contextMenu) return
+		if (entries.length === 0 || !contextMenu) return;
 
 		entries.forEach((entry) => {
 			entry.addEventListener('contextmenu', (e) => {
-				e.preventDefault()
-				e.stopPropagation()
+				e.preventDefault();
+				e.stopPropagation();
 
 				if (contextMenu.classList.contains('open')) {
-					contextMenu.style.transition = 'left .2s, top .2s'
+					contextMenu.style.transition = 'left .2s, top .2s';
 				}
 
-				contextMenu.classList.add('open')
+				contextMenu.classList.add('open');
 				// TODO: Make sure the context element has space on the screen (eg. display it on the left or top when there is no space)
-				const posX = e.clientX - window.scrollX
-				const posY = e.clientY + window.scrollY
-				contextMenu.style.left = `${posX}px`
-				contextMenu.style.top = `${posY}px`
-				contextMenu.innerHTML = ''
+				const posX = e.clientX - window.scrollX;
+				const posY = e.clientY + window.scrollY;
+				contextMenu.style.left = `${posX}px`;
+				contextMenu.style.top = `${posY}px`;
+				contextMenu.innerHTML = '';
 
 				const actions = entry.querySelectorAll(
 					'.tl_right a, .tl_content_right a, .tl_right_nowrap a'
-				)
+				);
 				if (actions.length === 0) {
-					contextMenu.classList.remove('open')
-					contextMenu.innerHTML = ''
-					contextMenu.style.transition = ''
+					contextMenu.classList.remove('open');
+					contextMenu.innerHTML = '';
+					contextMenu.style.transition = '';
 				}
 				actions.forEach((action) => {
-					const actionClone = action.cloneNode(true)
-					const actionText = document.createElement('span')
+					const actionClone = action.cloneNode(true);
+					const actionText = document.createElement('span');
 					// Contao earlier than 5.0 dont have an title attribute, use the alt text of the icon instead
 					actionText.innerHTML =
 						actionClone.title == ''
 							? actionClone.childNodes[0].alt
-							: actionClone.title
-					actionClone.appendChild(actionText)
-					contextMenu.appendChild(actionClone)
-				})
-			})
-		})
+							: actionClone.title;
+					actionClone.appendChild(actionText);
+					contextMenu.appendChild(actionClone);
+				});
+			});
+		});
 
 		window.addEventListener('click', (e) => {
 			if (contextMenu.classList.contains('open')) {
-				contextMenu.classList.remove('open')
-				contextMenu.style.transition = ''
+				contextMenu.classList.remove('open');
+				contextMenu.style.transition = '';
 
 				const removeContent = () => {
-					contextMenu.innerHTML = ''
+					contextMenu.innerHTML = '';
 					contextMenu.removeEventListener(
 						'transitionend',
 						removeContent
-					)
+					);
 				}
-				contextMenu.addEventListener('transitionend', removeContent)
+				contextMenu.addEventListener('transitionend', removeContent);
 			}
-		})
-	})()
+		});
+	})();
 
 	/**
 	 * Display id of elements
 	 */
-	;(async () => {
-		const enabled = await getSetting('displayIds')
+	; (async () => {
+		const enabled = await getSetting('displayIds');
 		if (!enabled) {
-			return
+			return;
 		}
 
 		const entries = document.querySelectorAll(
 			'.tl_file, .tl_content, .tl_folder, tr'
-		)
+		);
 
-		let idElements = []
+		let idElements = [];
 
 		entries.forEach((entry) => {
-			const idRegex = /(?:ID\s|ids_)(\d+)/g.exec(entry.innerHTML)
-			if (idRegex == null) return
-			const id = `ID ${idRegex[1]}` // Always format as "ID <num>"
+			const idRegex = /(?:ID\s|ids_)(\d+)/g.exec(entry.innerHTML);
+			if (idRegex == null) return;
+			const id = `ID ${idRegex[1]}`; // Always format as "ID <num>"
 
 			const right = entry.querySelectorAll(
 				'.tl_right, .tl_content_right, .tl_right_nowrap'
-			)
+			);
 			right.forEach((right) => {
-				const idElement = document.createElement('span')
-				idElement.className = 'tl_id'
-				idElement.innerHTML = id
-				idElements.push(idElement)
-				right.appendChild(idElement)
-			})
-		})
+				const idElement = document.createElement('span');
+				idElement.className = 'tl_id';
+				idElement.innerHTML = id;
+				idElements.push(idElement);
+				right.appendChild(idElement);
 
-		let widestId = 0
+				if (supportedByVersionMin('5.6')) {
+					right.style.display = "flex";
+					right.style.alignItems = "center";
+					right.style.justifyContent = "flex-end";
+					right.style.padding = "var(--row-padding) 6px";
+				}
+			});
+		});
+
+		let widestId = 0;
 		idElements.forEach((idElement) => {
-			const computedStyle = window.getComputedStyle(idElement)
-			const paddingLeft = parseFloat(computedStyle.paddingLeft)
-			const paddingRight = parseFloat(computedStyle.paddingRight)
-			const width = idElement.clientWidth - paddingLeft - paddingRight
+			const computedStyle = window.getComputedStyle(idElement);
+			const paddingLeft = parseFloat(computedStyle.paddingLeft);
+			const paddingRight = parseFloat(computedStyle.paddingRight);
+			const width = idElement.clientWidth - paddingLeft - paddingRight;
 			if (width > widestId) {
-				widestId = width
+				widestId = width;
 			}
-		})
+		});
 
 		idElements.forEach((idElement) => {
-			idElement.style.width = `${widestId}px`
-		})
-	})()
+			idElement.style.width = `${widestId}px`;
+		});
+	})();
 
 	/**
 	 * Create search bar when editing multiple settings
 	 */
-	;(async () => {
-		const searchMode = await getSetting('searchMode')
-		if (searchMode == 'disabled') return
+	(async () => {
+		const searchMode = await getSetting('searchMode');
+		if (searchMode == 'disabled') return;
 
-		const searchAutoFocus = await getSetting('searchAutoFocus')
+		const searchAutoFocus = await getSetting('searchAutoFocus');
 
-		const formEdit = document.querySelector('.tl_formbody_edit')
-		if (formEdit == null) return
+		const formEdit = document.querySelector('.tl_formbody_edit');
+		if (formEdit == null) return;
 
 		const fields = Array.from(
 			document.querySelectorAll(
 				'.tl_checkbox_container > :not(legend, br)'
 			)
-		)
-		if (fields.length == 0) return
+		);
+		if (fields.length == 0) return;
 
-		const map = []
+		const map = [];
 		fields.forEach((child) => {
 			// not an input
 			if (child.getAttribute('for') == null) {
@@ -248,12 +345,12 @@ window.addEventListener('load', async function () {
 					id: child.id,
 					input: child,
 					label: null
-				})
+				});
 			} else {
-				const name = child.getAttribute('for')
-				map.filter((i) => i.id == name)[0].label = child
+				const name = child.getAttribute('for');
+				map.filter((i) => i.id == name)[0].label = child;
 			}
-		})
+		});
 
 		const cleanup = () => {
 			map.forEach((item) => {
@@ -261,150 +358,150 @@ window.addEventListener('load', async function () {
 					'search-highlight',
 					'search-fade',
 					'search-hide'
-				)
+				);
 				item.label.classList.remove(
 					'search-highlight',
 					'search-fade',
 					'search-hide'
-				)
-			})
+				);
+			});
 		}
 
-		const searchBarContainer = this.document.createElement('div')
-		searchBarContainer.classList.add('search-bar')
-		const searchBarLabel = this.document.createElement('p')
-		searchBarLabel.innerHTML = 'Nach Einstellung suchen'
-		searchBarContainer.appendChild(searchBarLabel)
+		const searchBarContainer = this.document.createElement('div');
+		searchBarContainer.classList.add('search-bar');
+		const searchBarLabel = this.document.createElement('p');
+		searchBarLabel.innerHTML = 'Nach Einstellung suchen';
+		searchBarContainer.appendChild(searchBarLabel);
 
 		const fieldset = this.document.querySelector(
 			'.tl_tbox .widget .tl_checkbox_container'
-		)
+		);
 
-		if (fieldset == null) return
+		if (fieldset == null) return;
 
-		const searchBar = this.document.createElement('input')
-		searchBar.type = 'text'
-		searchBar.id = 'settings-search-bar'
-		searchBar.classList.add('tl_text')
+		const searchBar = this.document.createElement('input');
+		searchBar.type = 'text';
+		searchBar.id = 'settings-search-bar';
+		searchBar.classList.add('tl_text');
 		searchBar.addEventListener('keyup', (e) => {
-			cleanup()
-			const query = e.target.value.toLowerCase()
+			cleanup();
+			const query = e.target.value.toLowerCase();
 
 			map.forEach((item) => {
-				const inner = item.label.textContent.toLowerCase()
+				const inner = item.label.textContent.toLowerCase();
 				if (searchMode == 'highlight') {
 					if (inner.includes(query)) {
-						item.input.classList.add('search-highlight')
-						item.label.classList.add('search-highlight')
+						item.input.classList.add('search-highlight');
+						item.label.classList.add('search-highlight');
 					} else {
-						item.input.classList.add('search-fade')
-						item.label.classList.add('search-fade')
+						item.input.classList.add('search-fade');
+						item.label.classList.add('search-fade');
 					}
 				} else if (searchMode == 'filter') {
 					if (!inner.includes(query)) {
-						item.input.classList.add('search-hidden')
-						item.label.classList.add('search-hidden')
+						item.input.classList.add('search-hidden');
+						item.label.classList.add('search-hidden');
 					} else {
-						item.input.classList.remove('search-hidden')
-						item.label.classList.remove('search-hidden')
+						item.input.classList.remove('search-hidden');
+						item.label.classList.remove('search-hidden');
 					}
 
 					fieldset.style.height =
 						map.filter(
 							(i) => !i.label.classList.contains('search-hidden')
 						).length *
-							18.8 +
+						18.8 +
 						19 +
-						'px'
+						'px';
 				}
-			})
+			});
 
-			if (query == '') cleanup()
-		})
+			if (query == '') cleanup();
+		});
 
-		searchBarContainer.appendChild(searchBar)
+		searchBarContainer.appendChild(searchBar);
 
-		fieldset.before(searchBarContainer)
+		fieldset.before(searchBarContainer);
 
 		if (searchAutoFocus) {
 			// Focus the search bar automatically
-			searchBar.focus()
+			searchBar.focus();
 		}
-	})()
+	})();
 
 	/**
 	 * Handle extra tiny features
 	 */
-	;(async () => {
-		const enabled = await getSetting('tinyFeatures')
+	(async () => {
+		const enabled = await getSetting('tinyFeatures');
 		if (!enabled) {
-			return
+			return;
 		}
 
 		const tinyEditors = document.querySelectorAll(
 			'.widget:has(.tox-tinymce)'
-		)
+		);
 		tinyEditors.forEach((editor) => {
 			// Get the iframe inside the editor
-			const iframe = editor.querySelector('.tox-edit-area iframe')
-			if (!iframe) return
+			const iframe = editor.querySelector('.tox-edit-area iframe');
+			if (!iframe) return;
 
 			// Wait for the iframe to be loaded
 			iframe.addEventListener('load', () => {
 				// Get the body inside the iframe's document
 				const textArea =
-					iframe.contentDocument && iframe.contentDocument.body
-				if (!textArea) return
+					iframe.contentDocument && iframe.contentDocument.body;
+				if (!textArea) return;
 
 				const menuBar = editor.querySelector('.tox-menubar')
-				if (!menuBar) return
+				if (!menuBar) return;
 
 				// Create info container and append once
-				const infoContainer = document.createElement('div')
-				infoContainer.className = 'tiny-info'
+				const infoContainer = document.createElement('div');
+				infoContainer.className = 'tiny-info';
 
-				const charInfo = document.createElement('span')
-				const wordInfo = document.createElement('span')
-				const loremBtn = document.createElement('button')
-				loremBtn.innerHTML = 'Add lorem'
-				loremBtn.classList.add('tiny_btn')
+				const charInfo = document.createElement('span');
+				const wordInfo = document.createElement('span');
+				const loremBtn = document.createElement('button');
+				loremBtn.innerHTML = 'Add lorem';
+				loremBtn.classList.add('tiny_btn');
 
 				loremBtn.addEventListener('click', (e) => {
-					e.preventDefault()
-					e.stopPropagation()
-					lorem()
+					e.preventDefault();
+					e.stopPropagation();
+					lorem();
 				})
 
-				infoContainer.appendChild(charInfo)
-				infoContainer.appendChild(wordInfo)
-				infoContainer.appendChild(loremBtn)
+				infoContainer.appendChild(charInfo);
+				infoContainer.appendChild(wordInfo);
+				infoContainer.appendChild(loremBtn);
 
-				menuBar.appendChild(infoContainer)
+				menuBar.appendChild(infoContainer);
 
 				// Function to update info
 				const updateInfo = () => {
-					const text = stripHtml(textArea.innerHTML)
-					charInfo.innerHTML = `Zeichen: ${text.length}`
+					const text = stripHtml(textArea.innerHTML);
+					charInfo.innerHTML = `Zeichen: ${text.length}`;
 					// Count words: split by whitespace, filter out empty strings
 					const words =
 						text.trim().length === 0
 							? 0
-							: text.trim().split(/\s+/).length
-					wordInfo.innerHTML = `Wörter: ${words}`
+							: text.trim().split(/\s+/).length;
+					wordInfo.innerHTML = `Wörter: ${words}`;
 				}
 
 				const lorem = () => {
 					textArea.innerHTML =
 						textArea.innerHTML.trim() +
-						'<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.</p>'
-					updateInfo()
+						'<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.</p>';
+					updateInfo();
 				}
 
 				// Initial update
-				updateInfo()
+				updateInfo();
 
 				// Update on input/change
-				textArea.addEventListener('input', updateInfo)
+				textArea.addEventListener('input', updateInfo);
 			})
 
 			// If the iframe is already loaded, trigger the load handler manually
@@ -412,117 +509,117 @@ window.addEventListener('load', async function () {
 				iframe.contentDocument &&
 				iframe.contentDocument.readyState === 'complete'
 			) {
-				const event = new Event('load')
-				iframe.dispatchEvent(event)
+				const event = new Event('load');
+				iframe.dispatchEvent(event);
 			}
 		})
 
 		const formatClipboardToTel = (rawText) => {
-			if (!rawText) return null
-			let text = String(rawText).trim()
+			if (!rawText) return null;
+			let text = String(rawText).trim();
 			// Already a tel: URL
-			const telMatch = text.match(/tel:\s*([^\s]+)/i)
+			const telMatch = text.match(/tel:\s*([^\s]+)/i);
 			if (telMatch && telMatch[1]) {
-				let num = telMatch[1].replace(/[^\d+]/g, '')
-				if (num.startsWith('00')) num = '+' + num.slice(2)
-				return num ? `tel:${num}` : null
+				let num = telMatch[1].replace(/[^\d+]/g, '');
+				if (num.startsWith('00')) num = '+' + num.slice(2);
+				return num ? `tel:${num}` : null;
 			}
 
 			// Extract digits and +
-			let digits = text.replace(/[^\d+]/g, '')
-			if (!digits) return null
+			let digits = text.replace(/[^\d+]/g, '');
+			if (!digits) return null;
 
 			// Convert 00 prefix to +
 			if (digits.startsWith('00')) {
-				digits = '+' + digits.slice(2)
+				digits = '+' + digits.slice(2);
 			}
 
 			// German leading 0 => +49 drop 0
 			if (digits.startsWith('0')) {
-				digits = '+49' + digits.slice(1)
+				digits = '+49' + digits.slice(1);
 			} else if (/^49\d{6,}$/.test(digits)) {
 				// German without +
-				digits = '+' + digits
+				digits = '+' + digits;
 			} else if (/^\d{6,}$/.test(digits) && !digits.startsWith('+')) {
 				// Generic international without +
-				digits = '+' + digits
+				digits = '+' + digits;
 			}
 
 			if (!/^\+\d{6,}$/.test(digits)) {
-				return null
+				return null;
 			}
 
-			return `tel:${digits}`
+			return `tel:${digits}`;
 		}
 
 		const addPhoneButtonToToxDialog = (dialog) => {
-			if (!dialog || !(dialog instanceof HTMLElement)) return
-			if (dialog.querySelector('.ci-phone-button')) return
-			const footer = dialog.querySelector('.tox-dialog__footer')
-			if (!footer) return
+			if (!dialog || !(dialog instanceof HTMLElement)) return;
+			if (dialog.querySelector('.ci-phone-button')) return;
+			const footer = dialog.querySelector('.tox-dialog__footer');
+			if (!footer) return;
 
 			const footerEnd =
-				footer.querySelector('.tox-dialog__footer-end') || footer
+				footer.querySelector('.tox-dialog__footer-end') || footer;
 
-			const btn = document.createElement('button')
-			btn.type = 'button'
-			btn.className = 'tox-button ci-phone-button'
-			btn.textContent = 'Phone'
+			const btn = document.createElement('button');
+			btn.type = 'button';
+			btn.className = 'tox-button ci-phone-button';
+			btn.textContent = 'Phone';
 			btn.addEventListener('click', async (e) => {
-				e.preventDefault()
-				e.stopPropagation()
+				e.preventDefault();
+				e.stopPropagation();
 
 				const urlInput = dialog.querySelector(
 					'input.tox-textfield[type="url"], input.tox-textfield[type=url]'
-				)
-				if (!urlInput) return
+				);
+				if (!urlInput) return;
 
-				let clip = ''
+				let clip = '';
 				try {
 					if (navigator.clipboard && navigator.clipboard.readText) {
-						clip = await navigator.clipboard.readText()
+						clip = await navigator.clipboard.readText();
 					}
 				} catch (err) {
-					clip = ''
+					clip = '';
 				}
 
-				let formatted = formatClipboardToTel(clip)
+				let formatted = formatClipboardToTel(clip);
 				if (!formatted) {
-					formatted = 'tel:'
+					formatted = 'tel:';
 				}
 
-				urlInput.value = formatted
-				urlInput.dispatchEvent(new Event('input', { bubbles: true }))
-				urlInput.dispatchEvent(new Event('change', { bubbles: true }))
-				urlInput.focus()
-			})
+				urlInput.value = formatted;
+				urlInput.dispatchEvent(new Event('input', { bubbles: true }));
+				urlInput.dispatchEvent(new Event('change', { bubbles: true }));
+				urlInput.focus();
+			});
 
-			footerEnd.appendChild(btn)
+			footerEnd.appendChild(btn);
 		}
 
 		const toxObserver = new MutationObserver(() => {
 			document
 				.querySelectorAll('.tox-dialog')
-				.forEach(addPhoneButtonToToxDialog)
-		})
-		toxObserver.observe(document.body, { childList: true, subtree: true })
+				.forEach(addPhoneButtonToToxDialog);
+		});
+		toxObserver.observe(document.body, { childList: true, subtree: true });
 
 		// Handle already open dialogs
 		document
 			.querySelectorAll('.tox-dialog')
-			.forEach(addPhoneButtonToToxDialog)
-	})()
+			.forEach(addPhoneButtonToToxDialog);
+	})();
 
 	/**
 	 * Convert element infos to copy links
 	 */
-	;(async () => {
-		const enabled = await getSetting('elementInfo')
+	(async () => {
+		const enabled = await getSetting('elementInfo');
 		if (!enabled) {
-			return
+			return;
 		}
 
-		const autoClose = await getSetting('elementInfoAutoClose')
+		const autoClose = await getSetting('elementInfoAutoClose');
 
 		// TODO: ADD NOTIFICATION WHEN COPIED
 
@@ -530,16 +627,16 @@ window.addEventListener('load', async function () {
 		const addCopyFunctionality = (document, modal = null) => {
 			const rows = document.querySelectorAll(
 				'body table tr td:not(:has(span), .tl_label)'
-			)
+			);
 			rows.forEach((row) => {
 				// Skip if already processed
-				if (row.querySelector('.copy-link')) return
+				if (row.querySelector('.copy-link')) return;
 
-				row.innerHTML = `<a href="#" class="copy-link">${row.innerHTML}</a>`
-				row.style.textDecoration = 'underline'
+				row.innerHTML = `<a href="#" class="copy-link">${row.innerHTML}</a>`;
+				row.style.textDecoration = 'underline';
 				row.addEventListener('click', async (e) => {
-					e.preventDefault()
-					const text = row.innerText
+					e.preventDefault();
+					const text = row.innerText;
 
 					// Try to copy to clipboard with fallback methods
 					try {
@@ -547,45 +644,45 @@ window.addEventListener('load', async function () {
 							navigator.clipboard &&
 							navigator.clipboard.writeText
 						) {
-							await navigator.clipboard.writeText(text)
+							await navigator.clipboard.writeText(text);
 							window.createNotification(
 								'Copied to clipboard',
 								'success'
-							)
+							);
 						} else {
 							// Fallback for older browsers or restricted contexts
-							const textArea = document.createElement('textarea')
-							textArea.value = text
-							textArea.style.position = 'fixed'
-							textArea.style.left = '-999999px'
-							textArea.style.top = '-999999px'
-							document.body.appendChild(textArea)
-							textArea.focus()
-							textArea.select()
+							const textArea = document.createElement('textarea');
+							textArea.value = text;
+							textArea.style.position = 'fixed';
+							textArea.style.left = '-999999px';
+							textArea.style.top = '-999999px';
+							document.body.appendChild(textArea);
+							textArea.focus();
+							textArea.select();
 
-							const successful = document.execCommand('copy')
-							document.body.removeChild(textArea)
+							const successful = document.execCommand('copy');
+							document.body.removeChild(textArea);
 
 							if (!successful) {
-								throw new Error('Fallback copy failed')
+								throw new Error('Fallback copy failed');
 							}
 							window.createNotification(
 								'Copied to clipboard',
 								'success'
-							)
+							);
 						}
 					} catch (err) {
 						window.createNotification(
 							'Failed to copy to clipboard',
 							'error'
-						)
+						);
 					}
 
 					// Auto-close modal if we have a modal reference
 					if (autoClose && modal) {
-						const closeBtn = modal.querySelector('a.close')
+						const closeBtn = modal.querySelector('a.close');
 						if (closeBtn) {
-							closeBtn.click()
+							closeBtn.click();
 						}
 					}
 				})
@@ -596,445 +693,481 @@ window.addEventListener('load', async function () {
 		// Look for typical Contao admin table structures
 		const directPageTable = document.querySelector(
 			'body:not(.be_main) table tr td:not(:has(span), .tl_label)'
-		)
+		);
 		if (directPageTable) {
 			// We're on the direct page, add functionality immediately
 			addCopyFunctionality(document, null)
-		}
+		};
 
 		// Also handle modal context
-		let modalHandled = false
+		let modalHandled = false;
 
 		// check when element with id "simple-modal-overlay" is created or deleted
 		const observer = new MutationObserver((mutations) => {
 			mutations.forEach((mutation) => {
 				if (mutation.type === 'childList') {
-					const modalOverlay = document.querySelector('.simple-modal')
+					const modalOverlay = document.querySelector('.simple-modal');
 
 					// Modal was added
 					if (modalOverlay && !modalHandled) {
-						currentModal = modalOverlay
-						modalHandled = true
-						handleModal(modalOverlay)
+						currentModal = modalOverlay;
+						modalHandled = true;
+						handleModal(modalOverlay);
 					}
 					// Modal was removed
 					else if (!modalOverlay && modalHandled) {
-						modalHandled = false
-						currentModal = null
+						modalHandled = false;
+						currentModal = null;
 					}
 				}
-			})
-		})
+			});
+		});
 
 		// Start observing the document body for child list changes
-		observer.observe(document.body, { childList: true, subtree: true })
+		observer.observe(document.body, { childList: true, subtree: true });
 
 		const handleModal = (modal) => {
-			const modalIFrame = document.querySelector('.simple-modal iframe')
-			if (!modalIFrame) return
+			const modalIFrame = document.querySelector('.simple-modal iframe');
+			if (!modalIFrame) return;
 
 			// when iframe is loaded, add the click listener to the table rows
 			modalIFrame.addEventListener('load', () => {
-				addCopyFunctionality(modalIFrame.contentDocument, modal)
-			})
+				addCopyFunctionality(modalIFrame.contentDocument, modal);
+			});
 		}
-	})()
+	})();
 
 	/**
 	 * Auto published pages and articles
 	 */
-	;(async () => {
-		const enabled = await getSetting('autoPublished')
+	; (async () => {
+		const enabled = await getSetting('autoPublished');
 		if (!enabled) {
-			return
+			return;
 		}
 
 		// get all mandatory fields
-		const mandatoryFields = document.querySelectorAll('*[required]')
+		const mandatoryFields = document.querySelectorAll('*[required]');
 
 		if (mandatoryFields.length === 0) {
-			return
+			return;
 		}
 
 		// When the mandatory fields are empty, when loading the edit page,
 		// we can assume that the user is creating a new page or article.
-		let hasEmptyMandatory = false
+		let hasEmptyMandatory = false;
 		mandatoryFields.forEach((field) => {
 			if (field.value.trim() === '') {
-				hasEmptyMandatory = true
+				hasEmptyMandatory = true;
 			}
-		})
+		});
 
 		// Check if the alias field is empty
 		// If the alias field is empty, we can assume that the user has duplicated a page or article
-		const hasAlias = document.querySelector('input#ctrl_alias')
+		const hasAlias = document.querySelector('input#ctrl_alias');
 		if (hasAlias && hasAlias.value.trim() === '') {
-			hasEmptyMandatory = true
+			hasEmptyMandatory = true;
 		}
 
 		if (!hasEmptyMandatory) {
-			return
+			return;
 		}
 
-		const publishedContainer = document.querySelector('#ctrl_published')
+		const publishedContainer = document.querySelector('#ctrl_published');
 		if (!publishedContainer) {
-			return
+			return;
 		}
 
 		const publishedCheckbox = publishedContainer.querySelector(
 			'input[type="checkbox"]'
-		)
+		);
 		if (!publishedCheckbox) {
-			return
+			return;
 		}
 
-		publishedCheckbox.checked = true // Set the checkbox to checked
-	})()
+		publishedCheckbox.checked = true; // Set the checkbox to checked
+	})();
 
 	/**
 	 * Better styling
 	 */
-	;(async () => {
-		const enabled = await getSetting('betterStyling')
+	(async () => {
+		const enabled = await getSetting('betterStyling');
 		if (!enabled) {
-			return
+			return;
 		}
 
-		const style = document.createElement('link')
-		style.rel = 'stylesheet'
-		style.href = chrome.runtime.getURL('./assets/style_be.css')
-		document.head.appendChild(style)
-	})()
+		const style = document.createElement('link');
+		style.rel = 'stylesheet';
+		style.href = chrome.runtime.getURL('./assets/style_be.css');
+		document.head.appendChild(style);
+
+		if (supportedByVersion('5.5')) {
+			const style = document.createElement('link');
+			style.rel = 'stylesheet';
+			style.href = chrome.runtime.getURL('./assets/modules/filter_mod.css');
+			document.head.appendChild(style);
+		}
+	})();
 
 	/**
 	 * New sidebar sorting
 	 */
-	;(async () => {
-		const enabled = await getSetting('newSorting')
+	(async () => {
+		const enabled = await getSetting('newSorting');
 
 		// Disable when not supported by version
 		if (!supportedByVersion('5.0.0') || !enabled) {
-			return
+			return;
 		}
 
-		const contentGroup = document.querySelector('ul#content')
-		const pageEntry = document.querySelector('ul#design > li:has(a.page)')
-		const filesEntry = document.querySelector('ul#system > li:has(a.files)')
+		const contentGroup = document.querySelector('ul#content');
+		const pageEntry = document.querySelector('ul#design > li:has(a.page)');
+		const filesEntry = document.querySelector('ul#system > li:has(a.files)');
 
 		const articleEntry = document.querySelector(
 			'ul#content > li:has(a.article)'
-		)
-		contentGroup.prepend(pageEntry)
-		articleEntry.after(filesEntry)
-	})()
+		);
+		contentGroup.prepend(pageEntry);
+		articleEntry.after(filesEntry);
+	})();
 
 	/**
 	 * Sticky sidebar
 	 */
-	;(async () => {
-		const enabled = await getSetting('stickySidebar')
+	(async () => {
+		const enabled = await getSetting('stickySidebar');
 
 		if (!enabled) {
-			return
+			return;
 		}
 
-		const sidebar = document.querySelector('ul.menu_level_0')
+		const sidebar = document.querySelector('ul.menu_level_0');
 
-		if (!sidebar) return
+		if (!sidebar) return;
 
-		sidebar.style.position = 'sticky'
-		sidebar.style.top = '0px'
-	})()
+		sidebar.style.position = 'sticky';
+		sidebar.style.top = '0px';
+	})();
 
 	/**
 	 * Sticky toolbar
 	 */
-	;(async () => {
-		const enabled = await getSetting('stickyToolbar')
+	(async () => {
+		const enabled = await getSetting('stickyToolbar');
 
 		if (!enabled) {
-			return
+			return;
 		}
 
-		const toolbar = document.querySelector('#tl_buttons')
+		const toolbar = document.querySelector('#tl_buttons');
 
-		if (!toolbar) return
+		if (!toolbar) return;
 
-		toolbar.style.position = 'sticky'
-		toolbar.style.top = '0px'
-		toolbar.style.zIndex = '100'
-		toolbar.style.backgroundColor = 'var(--content-bg)'
-		toolbar.style.borderBottom = '1px solid var(--content-border)'
-	})()
+		toolbar.style.position = 'sticky';
+		toolbar.style.top = supportedByVersionMin('5.6') ? "30px" : "0px";
+		toolbar.style.zIndex = '100';
+		toolbar.style.backgroundColor = 'var(--content-bg)';
+		toolbar.style.borderBottom = '1px solid var(--content-border)';
+	})();
+
+	/**
+	 * Spread functions
+	 */
+	(async () => {
+		const enabled = await getSetting('spreadActions');
+
+		if (!enabled || !supportedByVersionMin('5.6')) {
+			return;
+		}
+		const operations = document.querySelectorAll('.tl_right .operations, .tl_content_right .operations, .tl_right_nowrap .operations');
+
+		operations.forEach(element => {
+			const menu = element.querySelector('.operations-menu-container');
+			const entries = menu.querySelectorAll('.operations-menu li');
+			const list = element.querySelector('ul');
+			Array.from(list.children).forEach((child) => {
+				if(!child.classList.contains('operations-menu-container')) {
+					child.remove();
+				}
+			});
+			entries.forEach(entry => {
+				const entryCopy = entry.cloneNode(true);
+				entryCopy.innerHTML = stripPlainText(entryCopy.innerHTML);
+				list.appendChild(entryCopy);
+			});
+			menu.querySelector('button').style.display = 'none';
+		});
+	})();
 
 	/**
 	 * Multi Edit
 	 */
-	;(async () => {
-		const enabled = await getSetting('multiEdit')
-		if (!enabled) {
-			return
-		}
+	// (async () => {
+	// 	const enabled = await getSetting('multiEdit');
+	// 	if (!enabled) {
+	// 		return;
+	// 	}
 
-		const getFormElements = (widget) => {
-			const elements = []
+	// 	const getFormElements = (widget) => {
+	// 		const elements = [];
 
-			// Get all select elements
-			const selects = widget.querySelectorAll('select')
-			elements.push(...selects)
+	// 		// Get all select elements
+	// 		const selects = widget.querySelectorAll('select');
+	// 		elements.push(...selects);
 
-			// Get all visible inputs (excluding hidden and certain styled ones)
-			const inputs = widget.querySelectorAll("input:not([type='hidden'])")
-			for (const input of inputs) {
-				if (
-					input.style.width === '100%' &&
-					input.getAttribute('tabindex') === '-1'
-				) {
-					continue
-				}
-				elements.push(input)
-			}
+	// 		// Get all visible inputs (excluding hidden and certain styled ones)
+	// 		const inputs = widget.querySelectorAll("input:not([type='hidden'])");
+	// 		for (const input of inputs) {
+	// 			if (
+	// 				input.style.width === '100%' &&
+	// 				input.getAttribute('tabindex') === '-1'
+	// 			) {
+	// 				continue;
+	// 			}
+	// 			elements.push(input);
+	// 		}
 
-			// Get all textareas
-			const textareas = widget.querySelectorAll('textarea')
-			elements.push(...textareas)
+	// 		// Get all textareas
+	// 		const textareas = widget.querySelectorAll('textarea');
+	// 		elements.push(...textareas);
 
-			// If no visible elements found, get hidden inputs
-			if (elements.length === 0) {
-				const hiddenInputs = widget.querySelectorAll(
-					"input[type='hidden']"
-				)
-				elements.push(...hiddenInputs)
-			}
+	// 		// If no visible elements found, get hidden inputs
+	// 		if (elements.length === 0) {
+	// 			const hiddenInputs = widget.querySelectorAll(
+	// 				"input[type='hidden']"
+	// 			);
+	// 			elements.push(...hiddenInputs);
+	// 		}
 
-			return elements
-		}
+	// 		return elements;
+	// 	}
 
-		const setChosenValue = (select, value) => {
-			select.value = value
+	// 	const setChosenValue = (select, value) => {
+	// 		select.value = value;
 
-			const chosenContainer = document.getElementById(select.id + '_chzn')
-			if (!chosenContainer) {
-				return false
-			}
+	// 		const chosenContainer = document.getElementById(select.id + '_chzn');
+	// 		if (!chosenContainer) {
+	// 			return false;
+	// 		}
 
-			const chosenSpan =
-				chosenContainer.querySelector('.chzn-single span')
-			if (chosenSpan && select.selectedIndex >= 0) {
-				const selectedOption = select.options[select.selectedIndex]
-				chosenSpan.textContent = selectedOption.text
-			}
+	// 		const chosenSpan =
+	// 			chosenContainer.querySelector('.chzn-single span');
+	// 		if (chosenSpan && select.selectedIndex >= 0) {
+	// 			const selectedOption = select.options[select.selectedIndex];
+	// 			chosenSpan.textContent = selectedOption.text;
+	// 		}
 
-			select.dispatchEvent(new Event('change', { bubbles: true }))
+	// 		select.dispatchEvent(new Event('change', { bubbles: true }));
 
-			return true
-		}
+	// 		return true;
+	// 	}
 
-		const setValue = (element, value, isChecked = null) => {
-			if (element.type === 'checkbox' || element.type === 'radio') {
-				element.checked = isChecked !== null ? isChecked : value
-				element.dispatchEvent(new Event('change', { bubbles: true }))
-			} else if (element.tagName.toLowerCase() === 'select') {
-				const chosenContainer = document.getElementById(
-					element.id + '_chzn'
-				)
-				if (chosenContainer) {
-					setChosenValue(element, value)
-				} else {
-					element.value = value
-					element.dispatchEvent(
-						new Event('change', { bubbles: true })
-					)
-				}
-			} else if (element.type === 'hidden') {
-				const widget = element.closest('.widget')
-				const associatedCheckbox = widget
-					? widget.querySelector('input[type="checkbox"]')
-					: null
+	// 	const setValue = (element, value, isChecked = null) => {
+	// 		if (element.type === 'checkbox' || element.type === 'radio') {
+	// 			element.checked = isChecked !== null ? isChecked : value;
+	// 			element.dispatchEvent(new Event('change', { bubbles: true }));
+	// 		} else if (element.tagName.toLowerCase() === 'select') {
+	// 			const chosenContainer = document.getElementById(
+	// 				element.id + '_chzn'
+	// 			);
+	// 			if (chosenContainer) {
+	// 				setChosenValue(element, value);
+	// 			} else {
+	// 				element.value = value;
+	// 				element.dispatchEvent(
+	// 					new Event('change', { bubbles: true })
+	// 				);
+	// 			}
+	// 		} else if (element.type === 'hidden') {
+	// 			const widget = element.closest('.widget');
+	// 			const associatedCheckbox = widget
+	// 				? widget.querySelector('input[type="checkbox"]')
+	// 				: null;
 
-				if (associatedCheckbox) {
-					associatedCheckbox.checked =
-						value === '1' || value === 'true' || value === true
-					associatedCheckbox.dispatchEvent(
-						new Event('change', { bubbles: true })
-					)
-				}
+	// 			if (associatedCheckbox) {
+	// 				associatedCheckbox.checked =
+	// 					value === '1' || value === 'true' || value === true;
+	// 				associatedCheckbox.dispatchEvent(
+	// 					new Event('change', { bubbles: true })
+	// 				);
+	// 			}
 
-				element.value = value
-			} else {
-				element.value = value
-			}
-		}
+	// 			element.value = value;
+	// 		} else {
+	// 			element.value = value;
+	// 		}
+	// 	}
 
-		const getValue = (element) => {
-			let value
-			if (element.type === 'checkbox' || element.type === 'radio') {
-				value = element.checked
-			} else if (element.tagName.toLowerCase() === 'select') {
-				value = element.value
-			} else if (element.type === 'hidden') {
-				const widget = element.closest('.widget')
-				const associatedCheckbox = widget
-					? widget.querySelector('input[type="checkbox"]')
-					: null
+	// 	const getValue = (element) => {
+	// 		let value;
+	// 		if (element.type === 'checkbox' || element.type === 'radio') {
+	// 			value = element.checked;
+	// 		} else if (element.tagName.toLowerCase() === 'select') {
+	// 			value = element.value;
+	// 		} else if (element.type === 'hidden') {
+	// 			const widget = element.closest('.widget');
+	// 			const associatedCheckbox = widget
+	// 				? widget.querySelector('input[type="checkbox"]')
+	// 				: null;
 
-				if (associatedCheckbox) {
-					value = associatedCheckbox.checked
-				} else {
-					value = element.value
-				}
-			} else {
-				value = element.value
-			}
-			return value
-		}
+	// 			if (associatedCheckbox) {
+	// 				value = associatedCheckbox.checked;
+	// 			} else {
+	// 				value = element.value;
+	// 			}
+	// 		} else {
+	// 			value = element.value;
+	// 		}
+	// 		return value;
+	// 	}
 
-		const applyAll = (widgets, value, originElement) => {
-			const originName = originElement.name
-			const originType =
-				originElement.type || originElement.tagName.toLowerCase()
-			const originClass = originElement.className
+	// 	const applyAll = (widgets, value, originElement) => {
+	// 		const originName = originElement.name
+	// 		const originType =
+	// 			originElement.type || originElement.tagName.toLowerCase()
+	// 		const originClass = originElement.className
 
-			// Find the index/position of the origin element within its widget
-			const originWidget = originElement.closest('.widget')
-			const originElements = getFormElements(originWidget)
-			const originIndex = originElements.indexOf(originElement)
+	// 		// Find the index/position of the origin element within its widget
+	// 		const originWidget = originElement.closest('.widget')
+	// 		const originElements = getFormElements(originWidget)
+	// 		const originIndex = originElements.indexOf(originElement)
 
-			widgets.forEach((widget) => {
-				const elements = getFormElements(widget)
+	// 		widgets.forEach((widget) => {
+	// 			const elements = getFormElements(widget)
 
-				elements.forEach((element, elementIndex) => {
-					if (element && element !== originElement) {
-						const elementType =
-							element.type || element.tagName.toLowerCase()
+	// 			elements.forEach((element, elementIndex) => {
+	// 				if (element && element !== originElement) {
+	// 					const elementType =
+	// 						element.type || element.tagName.toLowerCase()
 
-						// Only match by exact position within widget
-						const matchesByPosition = elementIndex === originIndex
+	// 					// Only match by exact position within widget
+	// 					const matchesByPosition = elementIndex === originIndex
 
-						if (matchesByPosition) {
-							if (
-								originElement.type === 'checkbox' ||
-								originElement.type === 'radio' ||
-								(originElement.type === 'hidden' &&
-									(value === true || value === false))
-							) {
-								setValue(element, null, value)
-							} else {
-								setValue(element, value)
-							}
-						}
-					}
-				})
-			})
-		}
+	// 					if (matchesByPosition) {
+	// 						if (
+	// 							originElement.type === 'checkbox' ||
+	// 							originElement.type === 'radio' ||
+	// 							(originElement.type === 'hidden' &&
+	// 								(value === true || value === false))
+	// 						) {
+	// 							setValue(element, null, value)
+	// 						} else {
+	// 							setValue(element, value)
+	// 						}
+	// 					}
+	// 				}
+	// 			})
+	// 		})
+	// 	}
 
-		let editAllStates = new Map()
-		let elementListeners = new Map()
+	// 	let editAllStates = new Map()
+	// 	let elementListeners = new Map()
 
-		if (window.location.search.includes('act=editAll')) {
-			const fieldFormContainer = document.querySelector(
-				'.tl_formbody_edit.nogrid'
-			)
-			if (!fieldFormContainer) return
-			const widgets = document.querySelectorAll('.widget')
+	// 	if (window.location.search.includes('act=editAll')) {
+	// 		const fieldFormContainer = document.querySelector(
+	// 			'.tl_formbody_edit.nogrid'
+	// 		)
+	// 		if (!fieldFormContainer) return
+	// 		const widgets = document.querySelectorAll('.widget')
 
-			widgets.forEach((widget, index) => {
-				let label = widget.querySelector('label')
-				if (!label) return
+	// 		widgets.forEach((widget, index) => {
+	// 			let label = widget.querySelector('label')
+	// 			if (!label) return
 
-				const formElements = getFormElements(widget)
-				if (formElements.length === 0) return
+	// 			const formElements = getFormElements(widget)
+	// 			if (formElements.length === 0) return
 
-				const widgetKey = `widget-${index}`
+	// 			const widgetKey = `widget-${index}`
 
-				const button = document.createElement('p')
-				button.innerHTML = 'Edit all'
-				button.classList.add('tl_submit')
-				button.style.display = 'inline-block'
-				button.style.margin = 'unset'
-				button.style.padding = 'unset'
+	// 			const button = document.createElement('p')
+	// 			button.innerHTML = 'Edit all'
+	// 			button.classList.add('tl_submit')
+	// 			button.style.display = 'inline-block'
+	// 			button.style.margin = 'unset'
+	// 			button.style.padding = 'unset'
 
-				button.addEventListener('click', (e) => {
-					e.preventDefault()
-					e.stopPropagation()
+	// 			button.addEventListener('click', (e) => {
+	// 				e.preventDefault()
+	// 				e.stopPropagation()
 
-					const isCurrentlyEditing =
-						editAllStates.get(widgetKey) || false
-					editAllStates.set(widgetKey, !isCurrentlyEditing)
+	// 				const isCurrentlyEditing =
+	// 					editAllStates.get(widgetKey) || false
+	// 				editAllStates.set(widgetKey, !isCurrentlyEditing)
 
-					if (!isCurrentlyEditing) {
-						button.innerHTML = 'Stop edit'
-						button.style.backgroundColor = '#f47c00'
-						button.style.color = 'white'
+	// 				if (!isCurrentlyEditing) {
+	// 					button.innerHTML = 'Stop edit'
+	// 					button.style.backgroundColor = '#f47c00'
+	// 					button.style.color = 'white'
 
-						// Set up listeners for all form elements in this widget
-						const listeners = []
+	// 					// Set up listeners for all form elements in this widget
+	// 					const listeners = []
 
-						formElements.forEach((formElement) => {
-							// Create individual listener for this specific element
-							const listener = (e) => {
-								const newValue = getValue(formElement)
-								applyAll(widgets, newValue, formElement)
-							}
+	// 					formElements.forEach((formElement) => {
+	// 						// Create individual listener for this specific element
+	// 						const listener = (e) => {
+	// 							const newValue = getValue(formElement)
+	// 							applyAll(widgets, newValue, formElement)
+	// 						}
 
-							listeners.push({
-								element: formElement,
-								listener: listener
-							})
+	// 						listeners.push({
+	// 							element: formElement,
+	// 							listener: listener
+	// 						})
 
-							const eventType =
-								formElement.tagName.toLowerCase() ===
-									'select' ||
-								formElement.type === 'checkbox' ||
-								formElement.type === 'radio'
-									? 'change'
-									: 'input'
+	// 						const eventType =
+	// 							formElement.tagName.toLowerCase() ===
+	// 								'select' ||
+	// 								formElement.type === 'checkbox' ||
+	// 								formElement.type === 'radio'
+	// 								? 'change'
+	// 								: 'input'
 
-							formElement.addEventListener(eventType, listener)
+	// 						formElement.addEventListener(eventType, listener)
 
-							if (formElement.type === 'hidden') {
-								const associatedCheckbox = widget.querySelector(
-									'input[type="checkbox"]'
-								)
-								if (associatedCheckbox) {
-									associatedCheckbox.addEventListener(
-										'change',
-										listener
-									)
-									listeners.push({
-										element: associatedCheckbox,
-										listener: listener
-									})
-								}
-							}
-						})
+	// 						if (formElement.type === 'hidden') {
+	// 							const associatedCheckbox = widget.querySelector(
+	// 								'input[type="checkbox"]'
+	// 							)
+	// 							if (associatedCheckbox) {
+	// 								associatedCheckbox.addEventListener(
+	// 									'change',
+	// 									listener
+	// 								)
+	// 								listeners.push({
+	// 									element: associatedCheckbox,
+	// 									listener: listener
+	// 								})
+	// 							}
+	// 						}
+	// 					})
 
-						elementListeners.set(widgetKey, listeners)
-					} else {
-						button.innerHTML = 'Edit all'
-						button.style.backgroundColor = ''
-						button.style.color = ''
+	// 					elementListeners.set(widgetKey, listeners)
+	// 				} else {
+	// 					button.innerHTML = 'Edit all'
+	// 					button.style.backgroundColor = ''
+	// 					button.style.color = ''
 
-						const listeners = elementListeners.get(widgetKey)
-						if (listeners) {
-							listeners.forEach(({ element, listener }) => {
-								const eventType =
-									element.tagName.toLowerCase() ===
-										'select' ||
-									element.type === 'checkbox' ||
-									element.type === 'radio'
-										? 'change'
-										: 'input'
-								element.removeEventListener(eventType, listener)
-							})
+	// 					const listeners = elementListeners.get(widgetKey)
+	// 					if (listeners) {
+	// 						listeners.forEach(({ element, listener }) => {
+	// 							const eventType =
+	// 								element.tagName.toLowerCase() ===
+	// 									'select' ||
+	// 									element.type === 'checkbox' ||
+	// 									element.type === 'radio'
+	// 									? 'change'
+	// 									: 'input'
+	// 							element.removeEventListener(eventType, listener)
+	// 						})
 
-							elementListeners.delete(widgetKey)
-						}
-					}
-				})
+	// 						elementListeners.delete(widgetKey)
+	// 					}
+	// 				}
+	// 			})
 
-				label.after(button)
-			})
-		}
-	})()
-})
+	// 			label.after(button)
+	// 		})
+	// 	}
+	// })()
+}

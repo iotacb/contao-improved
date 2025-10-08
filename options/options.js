@@ -13,6 +13,7 @@ const saveOptions = () => {
 	const stickySidebar = document.getElementById('sticky-sidebar').checked
 	const stickyToolbar = document.getElementById('sticky-toolbar').checked
 	const multiEdit = document.getElementById('multi-edit').checked
+	const spreadActions = document.getElementById('spread-actions').checked
 	const ci = document.getElementById('ci-enabled').checked
 	const searchMode = document.getElementById('search-mode').value
 	const searchAutoFocus = document.getElementById('search-auto-focus').checked
@@ -29,6 +30,7 @@ const saveOptions = () => {
 			stickySidebar,
 			stickyToolbar,
 			multiEdit,
+			spreadActions,
 			ci,
 			searchMode,
 			searchAutoFocus
@@ -61,6 +63,7 @@ const restoreOptions = () => {
 			stickySidebar: true,
 			stickyToolbar: true,
 			multiEdit: true,
+			spreadActions: true,
 			ci: true,
 			searchMode: 'highlight',
 			searchAutoFocus: true
@@ -83,6 +86,7 @@ const restoreOptions = () => {
 			document.getElementById('sticky-toolbar').checked =
 				items.stickyToolbar
 			document.getElementById('multi-edit').checked = items.multiEdit
+			document.getElementById('spread-actions').checked = items.spreadActions
 			document.getElementById('ci-enabled').checked = items.ci
 			document.getElementById('search-mode').value = items.searchMode
 			document.getElementById('search-auto-focus').checked =
@@ -312,13 +316,14 @@ const initializeTooltips = () => {
 
 	// Hide tooltips on click anywhere
 	document.addEventListener('click', hideTooltip, { passive: true })
+
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-	restoreOptions()
-	initializeCardInteractions()
-	initializeTooltips()
-})
+	restoreOptions();
+	initializeCardInteractions();
+	initializeTooltips();
+});
 
 document.getElementById('save').addEventListener('click', saveOptions)
 
@@ -327,3 +332,82 @@ const versionElement = document.getElementById('extension-version')
 if (versionElement) {
 	versionElement.textContent = `v${version}`
 }
+
+const compareVersions = (a, b) => {
+	for (let i = 0; i < 3; i++) {
+		if (a[i] > b[i]) return 1;
+		if (a[i] < b[i]) return -1;
+	}
+	return 0;
+};
+
+const parseVersion = (str) => {
+	// Handles "4", "4.13", "4.13.2"
+	const parts = String(str).trim().split(".").map((n) => Number(n));
+	return [parts[0] || 0, parts[1] || 0, parts[2] || 0];
+};
+
+const parseVersionRange = (attr) => {
+	const raw = String(attr || "").trim();
+	if (!raw) return [[0, 0, 0], [Infinity, Infinity, Infinity]];
+
+	if (raw.includes("-")) {
+		const [minStr, maxStr] = raw.split("-").map((s) => s.trim());
+		const minV = parseVersion(minStr);
+		const maxV =
+			maxStr ? parseVersion(maxStr) : [Infinity, Infinity, Infinity];
+		return [minV, maxV];
+	}
+
+	// Single version -> treat as minimum; no max
+	return [parseVersion(raw), [Infinity, Infinity, Infinity]];
+};
+
+async function loadInitial() {
+	try {
+		const { contentData } = await chrome.storage.local.get("contentData");
+		if (!contentData || !contentData.contaoVersion) {
+			console.warn("No contaoVersion found in storage");
+			return;
+		}
+
+		const version = contentData.contaoVersion;
+
+		const features = document.querySelectorAll(".feature-card");
+		features.forEach((feature) => {
+			const attr = feature.getAttribute("data-version");
+			const [minV, maxV] = parseVersionRange(attr);
+
+			const tooLow = compareVersions(version, minV) < 0;
+			const tooHigh = compareVersions(version, maxV) > 0;
+
+			if (tooLow || tooHigh) {
+				feature.classList.add("disabled");
+				feature.setAttribute("aria-disabled", "true");
+			} else {
+				feature.classList.remove("disabled");
+				feature.removeAttribute("aria-disabled");
+			}
+		});
+	} catch (e) {
+		console.error("Failed to read storage:", e);
+	}
+}
+
+function subscribe() {
+	chrome.storage.onChanged.addListener((changes, area) => {
+		if (area !== "local") return;
+		if (changes.contentData) {
+			const newVal =
+				"newValue" in changes.contentData
+					? changes.contentData.newValue
+					: undefined;
+			console.log(newVal);
+		}
+	});
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+	loadInitial();
+	subscribe();
+});
